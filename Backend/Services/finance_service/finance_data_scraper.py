@@ -34,11 +34,3 @@ async def get_batch_yahoo_stock_data(symbols: list):
             final_results[symbol] = symbol_data  
     return final_results
 
-async def main():
-    symbols = ['MSFT', 'AAPL', 'GOOG', "A1231"]
-    stock_data = await get_batch_yahoo_stock_data(symbols)
-    
-    # print(stock_data)
-
-if __name__ == "__main__":
-    asyncio.run(main())
