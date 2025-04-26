@@ -9,4 +9,6 @@
     <string name="clear_button_text">Clear</string>
     <string name="top_finance_logo">Top Finance Logo</string>
     <string name="dismiss_button">Dismiss</string>
+    <string name="return_login_button">Return to login page</string>
+    <string name="sign_up_success_dialog">Sign up success</string>
 </resources>

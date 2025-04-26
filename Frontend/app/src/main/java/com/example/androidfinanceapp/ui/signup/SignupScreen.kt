@@ -7,8 +7,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -21,11 +27,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.androidfinanceapp.R
+import com.example.androidfinanceapp.ui.Screens
 import com.example.androidfinanceapp.ui.login.ErrorDialog
 import com.example.androidfinanceapp.ui.login.PasswordTextField
 import com.example.androidfinanceapp.ui.login.TopFinanceTitle
@@ -98,8 +106,13 @@ fun SignupScreen(
             }
             is SignupUiState.Success -> {
                 // Display showing Signup success, when button pressed, navigate to login screen
-
-
+                ReturnLoginDialog(
+                    onDismissRequest = {
+                        signupViewModel.setUiStateIdle()
+                        navController.navigate(Screens.LoginScreen.route)
+                    },
+                    dialogText = stringResource(R.string.sign_up_success_dialog)
+                )
             }
             is SignupUiState.Error -> {
                 val errorMessage = signupUiState.message
@@ -117,4 +130,43 @@ fun SignupScreen(
 
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ReturnLoginDialog(
+    onDismissRequest: () -> Unit,
+    dialogText: String,
+) {
+    BasicAlertDialog(
+        onDismissRequest = onDismissRequest,
+        content = {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(400.dp)
+                    .padding(16.dp),
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = dialogText,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    Button(
+                        onClick = onDismissRequest
+                    ) {
+                        Text(text = stringResource(R.string.return_login_button))
+                    }
+                }
+            }
+        }
+    )
 }
