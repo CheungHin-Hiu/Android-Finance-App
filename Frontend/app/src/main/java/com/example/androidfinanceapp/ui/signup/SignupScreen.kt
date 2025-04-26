@@ -89,11 +89,9 @@ fun SignupScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             OutlinedButton(onClick = {
-                username = ""
-                password = ""
-                confirmPassword = ""
+                navController.navigate(Screens.LoginScreen.route)
             }) {
-                Text(stringResource(R.string.clear_button_text))
+                Text(stringResource(R.string.return_login_button))
             }
             Button(onClick = {signupViewModel.signup(username, password, confirmPassword)}) {
                 Text(stringResource(R.string.sign_up))
