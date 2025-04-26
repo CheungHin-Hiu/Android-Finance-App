@@ -1,0 +1,31 @@
+package com.example.androidfinanceapp.data
+
+import com.example.androidfinanceapp.network.AuthApiService
+import retrofit2.Retrofit
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
+
+// Dependency Injection container at the application level
+interface AppContainer {
+    val authRepository: AuthRepository
+}
+
+// Implementation of the dependency injection container
+class DefaultAppContainer: AppContainer {
+    private val baseUrl = "https://localhost:1234/"
+
+    private val json = Json { ignoreUnknownKeys = true}
+    private val retrofit: Retrofit = Retrofit.Builder()
+        .baseUrl(baseUrl)
+        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+        .build()
+
+    private val authService: AuthApiService by lazy {
+        retrofit.create(AuthApiService::class.java)
+    }
+
+    override val authRepository: AuthRepository by lazy {
+        NetworkAuthRepository(authService)
+    }
+}
