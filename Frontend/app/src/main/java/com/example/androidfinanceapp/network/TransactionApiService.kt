@@ -12,15 +12,12 @@ interface TransactionApiService {
     //get all transactions
     @GET("/transactions")
     suspend fun getTransactions(
-        @Header("auth") token: String,
-        @Query("startDate") startDate: String,
-        @Query("endDate") endDate: String
+        @Body request: GetTransactionRequest
     ): Response<TransactionsResponse>
 
     //add transactions to db
     @POST("/transactions")
     suspend fun addTransaction(
-        @Header("auth") token: String,
         @Body request: AddTransactionRequest
     ):Response<Unit>
 }
@@ -49,7 +46,7 @@ data class Transaction(
 //adding the transaction and its category
 @Serializable
 data class AddTransactionRequest(
-    @SerialName("id") val id: String,
+    @SerialName("auth") val token: String,
     @SerialName("type") val type: String,
     @SerialName("category_type") val categoryType: String,
     @SerialName("currency_type") val currencyType: String,
@@ -57,4 +54,11 @@ data class AddTransactionRequest(
     @SerialName("date") val date: String,
     @SerialName("remark") val remark: String,
     @SerialName("created_at") val createdAt: String
+)
+
+@Serializable
+data class  GetTransactionRequest(
+    @SerialName("auth") val token: String,
+    @SerialName("startDate") val startDate: String,
+    @SerialName("endDate") val endDate: String
 )

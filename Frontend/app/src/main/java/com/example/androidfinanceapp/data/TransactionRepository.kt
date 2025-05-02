@@ -1,5 +1,6 @@
 package com.example.androidfinanceapp.data
 import com.example.androidfinanceapp.network.AddTransactionRequest
+import com.example.androidfinanceapp.network.GetTransactionRequest
 import com.example.androidfinanceapp.network.TransactionApiService
 import com.example.androidfinanceapp.network.TransactionsResponse
 import retrofit2.Response
@@ -13,7 +14,6 @@ interface TransactionRepository {
 
     suspend fun addTransaction(
         token: String,
-        id: String,
         type: String,
         categoryType: String,
         currencyType: String,
@@ -35,14 +35,13 @@ class NetworkTransactionRepository(
         endDate: String
     ): Response<TransactionsResponse> =
         transactionApiService.getTransactions(
-            token = token,
-            startDate = startDate,
-            endDate = endDate
+            request = GetTransactionRequest(token = token,
+                startDate = startDate,
+                endDate = endDate)
         )
 
     override suspend fun addTransaction(
         token: String,
-        id: String,
         type: String,
         categoryType: String,
         currencyType: String,
@@ -52,9 +51,8 @@ class NetworkTransactionRepository(
         createAt: String
     ): Response<Unit> =
         transactionApiService.addTransaction(
-            token = token,
             request = AddTransactionRequest(
-                id = id,
+                token = token,
                 type = type,
                 categoryType = categoryType,
                 currencyType = currencyType,
