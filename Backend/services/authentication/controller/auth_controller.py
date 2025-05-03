@@ -1,19 +1,20 @@
 from abc import ABC, abstractmethod
 from ..token.encryption import hash_password, verify_password
 from ..token.access_token import JWTGenerator
-
+from pymongo.mongo_client import MongoClient
 class AuthController(ABC):
 
 
-    def __init__(self, database_entity) -> None:
-        super.__init__()
+    def __init__(self, database_entity:MongoClient) -> None:
+        super().__init__()
         self.token_generator = JWTGenerator()
-        self._user_credential_collection = None # need to update to the db controller used
+        self._user_credential_collection = database_entity["COMP4521"]["credential"]
+        # print(self._user_credential_collection)
 
 
 class LoginController(AuthController):
 
-    def __init__(self, database_entity) ->None:
+    def __init__(self, database_entity: MongoClient) ->None:
         super().__init__(database_entity)
         
 
@@ -34,17 +35,21 @@ class LoginController(AuthController):
         
         # check for username and password if token expired 
         try:
-            user_information = self._user_credential_collection # need to chaneg to the db controller get function
-        
+            user_information = self._user_credential_collection.find_one({"username": username}) # need to chaneg to the db controller get function
+           
         except Exception as e:
+    
             return {'status':400, 'error': 'Invalid Login Credential'}
 
+       
 
         try:         
             user_id = user_information.get('_id')
-            hash_password = user_information.get('hashed_pwd')
-            isPwdCorrect = verify_password(password, hash_password)
+            hashed_password = user_information.get('password')
+            isPwdCorrect = verify_password(password, hashed_password)
+            
         except Exception as e:
+
             return {"status": 500, 'error': 'internal server error'}
 
         if not isPwdCorrect:
@@ -57,6 +62,7 @@ class LoginController(AuthController):
         try:
             new_token = self.token_generator.create_jwt_token(token_generator_payload)
         except Exception as e:
+       
              return {"status": 500, 'error': 'internal server error'}
 
         return { 'status':200, 'username': username, 'token': new_token}
@@ -76,7 +82,7 @@ class RegisterController(AuthController):
             return {'status': 400, 'error': 'must have username and password as input'}
         
         try:
-            isUserExist = self._user_credential_collection # update to the find function for that db
+            isUserExist = self._user_credential_collection.find_one({"username": username}) # update to the find function for that db
             if(isUserExist):
                 return {'status': 400, 'error':'username already exist'}
 
@@ -85,15 +91,16 @@ class RegisterController(AuthController):
 
 
         
-        hash_password = hash_password(password)
+        hashed_password = hash_password(password)
         try:
             user_information = {
-                username: username,
-                password: hash_password
+                "username": username,
+                "password": hashed_password
             }
-            user_inserted =self._user_credential_collection # update to the insert function for that db controller
-            user_id = user_inserted.insert_id
+            user_inserted =self._user_credential_collection.insert_one(user_information) # update to the insert function for that db controller
+            user_id = user_inserted.inserted_id
         except Exception as e:
+            print(e)
             return {"status": 500, 'error': 'internal server error'}
         
         token_generator_payload = {
