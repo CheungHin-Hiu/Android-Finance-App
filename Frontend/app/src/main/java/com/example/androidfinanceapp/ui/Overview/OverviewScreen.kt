@@ -13,31 +13,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -66,17 +54,12 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PaintingStyle.Companion.Stroke
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -87,8 +70,6 @@ import com.example.androidfinanceapp.network.Transaction
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import kotlin.math.cos
-import kotlin.math.sin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -219,6 +200,76 @@ fun OverviewScreen(
             Transaction(
                 type = "Expense",
                 categoryType = "Shopping",
+                currencyType = "HKD",
+                amount = 40.50,
+                localAmount = 60.50,
+                date = "1/5/2025",
+                remark = "",
+                createdAt = "3/5/2025"
+            ),
+            Transaction(
+                type = "Income",
+                categoryType = "Dividend",
+                currencyType = "HKD",
+                amount = 40.50,
+                localAmount = 60.50,
+                date = "1/5/2025",
+                remark = "",
+                createdAt = "3/5/2025"
+            ),
+            Transaction(
+                type = "Income",
+                categoryType = "Interest",
+                currencyType = "HKD",
+                amount = 40.50,
+                localAmount = 60.50,
+                date = "1/5/2025",
+                remark = "",
+                createdAt = "3/5/2025"
+            ),
+            Transaction(
+                type = "Income",
+                categoryType = "gift",
+                currencyType = "HKD",
+                amount = 40.50,
+                localAmount = 60.50,
+                date = "1/5/2025",
+                remark = "",
+                createdAt = "3/5/2025"
+            ),
+            Transaction(
+                type = "Income",
+                categoryType = "Loyalty",
+                currencyType = "HKD",
+                amount = 40.50,
+                localAmount = 60.50,
+                date = "1/5/2025",
+                remark = "",
+                createdAt = "3/5/2025"
+            ),
+            Transaction(
+                type = "Income",
+                categoryType = "Rent",
+                currencyType = "HKD",
+                amount = 40.50,
+                localAmount = 60.50,
+                date = "1/5/2025",
+                remark = "",
+                createdAt = "3/5/2025"
+            ),
+            Transaction(
+                type = "Income",
+                categoryType = "Other",
+                currencyType = "HKD",
+                amount = 40.50,
+                localAmount = 60.50,
+                date = "1/5/2025",
+                remark = "",
+                createdAt = "3/5/2025"
+            ),
+            Transaction(
+                type = "Expense",
+                categoryType = "Other",
                 currencyType = "HKD",
                 amount = 40.50,
                 localAmount = 60.50,
@@ -680,13 +731,18 @@ fun TransactionItem(
                         categoryType.contains("Food", ignoreCase = true) -> painterResource(R.drawable.food_circle)
                         categoryType.contains("Rent", ignoreCase = true) -> painterResource(R.drawable.rent_circle)
                         categoryType.contains("Salary", ignoreCase = true) -> painterResource(R.drawable.salary_circle)
-                        categoryType.contains("Interest", ignoreCase = true) -> painterResource(R.drawable.food_circle)
+                        categoryType.contains("Interest", ignoreCase = true) -> painterResource(R.drawable.rent_circle)
                         categoryType.contains("Transport", ignoreCase = true) -> painterResource(R.drawable.transport_circle)
                         categoryType.contains("Shopping", ignoreCase = true) -> painterResource(R.drawable.shopping_circle)
                         categoryType.contains("Medicine", ignoreCase = true) -> painterResource(R.drawable.medicine_circle)
                         categoryType.contains("Entertainment", ignoreCase = true) -> painterResource(R.drawable.entertainment_circle)
                         categoryType.contains("Gift", ignoreCase = true) -> painterResource(R.drawable.gift_circle)
-                        categoryType.contains("networking", ignoreCase = true) -> painterResource(R.drawable.networking_circle)
+                        categoryType.contains("Networking", ignoreCase = true) -> painterResource(R.drawable.networking_circle)
+                        categoryType.contains("Interest", ignoreCase = true) -> painterResource(R.drawable.interest_circle)
+                        categoryType.contains("Loyalty", ignoreCase = true) -> painterResource(R.drawable.loyalty_circle)
+                        categoryType.contains("Dividend", ignoreCase = true) -> painterResource(R.drawable.dividend_circle)
+                        categoryType.contains("Other", ignoreCase = true)&&type.contains("Expense", ignoreCase = true) -> painterResource(R.drawable.expense_other_circle)
+                        categoryType.contains("Income", ignoreCase = true)&&type.contains("Income", ignoreCase = true) -> painterResource(R.drawable.income_other_circle)
                         else -> painterResource(R.drawable.salary_circle)
                     },
                     contentDescription = categoryType,
@@ -985,16 +1041,22 @@ data class ChartItem(
 
 fun getCategoryColor(category: String): Color {
     return when {
+        category.contains("Entertainment", ignoreCase = true) -> Color(0xFFFF7043) // Deep Orange (prominent in your chart)
+        category.contains("Networking", ignoreCase = true) -> Color(0xFF26C6DA) // Cyan
+        category.contains("Medicine", ignoreCase = true) -> Color(0xFFAB47BC) // Purple
+        category.contains("Gift", ignoreCase = true) -> Color(0xFF9575CD) // Light Purple
+        category.contains("Transport", ignoreCase = true) -> Color(0xFFFFB300) // Amber
+        category.contains("Shopping", ignoreCase = true) -> Color(0xFFEF5350) // Red-ish
+
+        // Keep your other existing categories
         category.contains("Food", ignoreCase = true) -> Color(0xFFFFCA28) // Yellow
         category.contains("Rent", ignoreCase = true) -> Color(0xFF42A5F5) // Blue
         category.contains("Salary", ignoreCase = true) -> Color(0xFF66BB6A) // Green
         category.contains("Interest", ignoreCase = true) -> Color(0xFF26A69A) // Teal
-        category.contains("Transport", ignoreCase = true) -> Color(0xFFFFB300) // Amber
-        category.contains("Shopping", ignoreCase = true) -> Color(0xFFEF5350) // Red-ish
-        category.contains("Medicine", ignoreCase = true) -> Color(0xFFAB47BC) // Purple
-        category.contains("Entertainment", ignoreCase = true) -> Color(0xFFFF7043) // Deep Orange
-        category.contains("Gift", ignoreCase = true) -> Color(0xFF9575CD) // Light Purple
-        category.contains("Networking", ignoreCase = true) -> Color(0xFF26C6DA) // Cyan
+        category.contains("Dividend", ignoreCase = true) -> Color(0xFF4DB6AC) // Teal variant
+        category.contains("Loyalty", ignoreCase = true) -> Color(0xFF7986CB) // Indigo
+
+        // Other/default case
         else -> Color(0xFF78909C) // Gray
     }
 }
