@@ -6,6 +6,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -70,6 +72,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -95,12 +98,7 @@ fun OverviewScreen(
     modifier: Modifier = Modifier,
     overviewViewModel: OverviewViewModel = viewModel(factory = OverviewViewModel.Factory)
 ) {
-    val getTransactionState = overviewViewModel.getTransactionState
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-
     val token by dataStoreManager.tokenFlow.collectAsState(initial = null)
-
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -176,8 +174,58 @@ fun OverviewScreen(
                 date = "1/5/2025",
                 remark = "",
                 createdAt = "3/5/2025"
-            )
+            ),
             // More transactions can be added here
+            Transaction(
+                type = "Expense",
+                categoryType = "Entertainment",
+                currencyType = "HKD",
+                amount = 40.50,
+                localAmount = 60.50,
+                date = "1/5/2025",
+                remark = "",
+                createdAt = "3/5/2025"
+            ),
+            Transaction(
+                type = "Expense",
+                categoryType = "Gift",
+                currencyType = "HKD",
+                amount = 40.50,
+                localAmount = 60.50,
+                date = "1/5/2025",
+                remark = "",
+                createdAt = "3/5/2025"
+            ),
+            Transaction(
+                type = "Expense",
+                categoryType = "Transport",
+                currencyType = "HKD",
+                amount = 40.50,
+                localAmount = 60.50,
+                date = "1/5/2025",
+                remark = "",
+                createdAt = "3/5/2025"
+            ),
+            Transaction(
+                type = "Expense",
+                categoryType = "Entertainment",
+                currencyType = "HKD",
+                amount = 40.50,
+                localAmount = 60.50,
+                date = "1/5/2025",
+                remark = "",
+                createdAt = "3/5/2025"
+            ),
+            Transaction(
+                type = "Expense",
+                categoryType = "Shopping",
+                currencyType = "HKD",
+                amount = 40.50,
+                localAmount = 60.50,
+                date = "1/5/2025",
+                remark = "",
+                createdAt = "3/5/2025"
+            ),
         )
     }
 
@@ -702,7 +750,7 @@ fun TransactionCharts(transactions: List<Transaction>) {
         .groupBy { it.categoryType }
         .mapValues { it.value.sumOf { transaction -> transaction.localAmount } }
 
-    // Create pie chart data
+    // Create chart data
     val expenseChartData = expenseByCategory.map { (category, amount) ->
         ChartItem(
             category = category,
@@ -710,7 +758,7 @@ fun TransactionCharts(transactions: List<Transaction>) {
             percentage = if (totalExpense > 0) (amount / totalExpense * 100) else 0.0,
             color = getCategoryColor(category)
         )
-    }
+    }.sortedByDescending { it.percentage }
 
     val incomeChartData = incomeByCategory.map { (category, amount) ->
         ChartItem(
@@ -719,323 +767,212 @@ fun TransactionCharts(transactions: List<Transaction>) {
             percentage = if (totalIncome > 0) (amount / totalIncome * 100) else 0.0,
             color = getCategoryColor(category)
         )
-    }
+    }.sortedByDescending { it.percentage }
+
+    // Track whether to show income or expense data
+    var showIncome by remember { mutableStateOf(false) }
+
+    // Determine which data to display
+    val displayData = if (showIncome) incomeChartData else expenseChartData
+    val totalAmount = if (showIncome) totalIncome else totalExpense
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        // Summary information - Total Income and Total Expense
+        // Header with Category title and Income/Expense toggle
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Income summary
-            Column {
-                Text(
-                    text = "Category",
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold,
-                )
+            Text(
+                text = "Category",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
 
+            // Income/Expense toggle button
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color(0xFFF0F0F0))
+                    .padding(4.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .clickable { showIncome = false }
+                        .background(
+                            if (!showIncome) Color(0xFFE57373) else Color.Transparent
+                        )
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = "Expense",
+                        color = if (!showIncome) Color.White else Color.DarkGray,
+                        fontWeight = if (!showIncome) FontWeight.Bold else FontWeight.Normal
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .clickable { showIncome = true }
+                        .background(
+                            if (showIncome) Color(0xFF81C784) else Color.Transparent
+                        )
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = "Income",
+                        color = if (showIncome) Color.White else Color.DarkGray,
+                        fontWeight = if (showIncome) FontWeight.Bold else FontWeight.Normal
+                    )
+                }
             }
-
-
         }
 
-        // Horizontally scrollable charts without cards
-        LazyRow(
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            // Expense chart
-            item {
-                SimpleChartView(
-                    title = "Expense",
-                    chartData = expenseChartData,
-                    totalAmount = totalExpense,
-                    isExpense = true
-                )
-            }
-
-            // Income chart
-            item {
-                SimpleChartView(
-                    title = "Income",
-                    chartData = incomeChartData,
-                    totalAmount = totalIncome,
-                    isExpense = false
-                )
-            }
-        }
-    }
-}
-
-@SuppressLint("DefaultLocale")
-@Composable
-fun SimpleChartView(
-    title: String,
-    chartData: List<ChartItem>,
-    totalAmount: Double,
-    isExpense: Boolean
-) {
-    Column(
-        modifier = Modifier
-            .width(300.dp)
-    ) {
-        // Title
-        Text(
-            text = title,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 4.dp),
-            textAlign = TextAlign.Center
-        )
-
-        if (chartData.isEmpty()) {
+        if (displayData.isEmpty()) {
+            // Show message when no data is available
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(240.dp),
+                    .height(280.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "No data available",
-                    color = Color.Gray
+                    color = Color.Gray,
+                    fontSize = 16.sp
                 )
             }
         } else {
-            // Pie chart with labeled segments
+            // Chart and legend side by side
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(240.dp),
-                contentAlignment = Alignment.Center
+                    .height(300.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .background(Color(0xFFF8F7FA), RoundedCornerShape(16.dp))
+                    .padding(16.dp)
             ) {
-                DonutChart(
-                    data = chartData,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
-        }
-    }
-}
-
-@SuppressLint("DefaultLocale")
-@Composable
-fun DonutChart(
-    data: List<ChartItem>,
-    modifier: Modifier = Modifier,
-
-) {
-    if (data.isEmpty()) return
-
-    // Track which segment is being hovered
-    var hoveredSegment by remember { mutableStateOf<ChartItem?>(null) }
-
-    // Track mouse position for tooltip
-    var mousePosition by remember { mutableStateOf(Offset.Zero) }
-
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .aspectRatio(1.4f)
-            .background(Color(0xFFE3F2FD), RoundedCornerShape(8.dp))
-            .padding(12.dp)
-    ) {
-        Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(Unit) {
-                    awaitPointerEventScope {
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            val position = event.changes.first().position
-
-                            // Save position for tooltip
-                            mousePosition = position
-
-                            val canvasCenter = Offset(x = size.width / 2f, y = size.height / 2f)
-                            val vector = position - canvasCenter
-
-                            // Calculate distance from center
-                            val distanceFromCenter = vector.getDistance()
-                            val radius = minOf(size.width, size.height) / 2 * 0.8f
+                Row(modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    // Left side: Donut Chart with Total
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        // Donut Chart
+                        Canvas(
+                            modifier = Modifier
+                                .size(200.dp)
+                                .padding(8.dp)
+                        ) {
+                            val canvasWidth = size.width
+                            val canvasHeight = size.height
+                            val radius = minOf(canvasWidth, canvasHeight) / 2 * 0.9f
+                            val center = Offset(x = canvasWidth / 2f, y = canvasHeight / 2f)
                             val innerRadius = radius * 0.6f
 
-                            // Skip if mouse is in center area or outside the chart
-                            if (distanceFromCenter < innerRadius || distanceFromCenter > radius) {
-                                hoveredSegment = null
-                                continue
-                            }
-
-                            // Calculate angle in radians, then convert to degrees
-                            val angleRadians = kotlin.math.atan2(vector.y, vector.x)
-                            var angleDegrees = Math.toDegrees(angleRadians.toDouble()).toFloat()
-
-                            // Normalize to 0-360 degrees, starting from the top (90 degrees in atan2 terms)
-                            angleDegrees = (angleDegrees + 360) % 360
-
-                            // DEBUG CODE - log angleDegrees to see the values
-                            // Log.d("DonutChart", "Angle: $angleDegrees")
-
-                            // Find which segment this angle belongs to
+                            // Draw segments
                             var startAngle = 0f
-                            hoveredSegment = null
 
-                            for (item in data) {
+                            displayData.forEach { item ->
                                 val sweepAngle = (item.percentage * 3.6).toFloat()
 
-                                // Handle the case where an angle wraps around 360/0
-                                val endAngle = (startAngle + sweepAngle) % 360
+                                if (sweepAngle > 0) {
+                                    // Draw segment
+                                    drawArc(
+                                        color = item.color,
+                                        startAngle = startAngle,
+                                        sweepAngle = sweepAngle,
+                                        useCenter = true,
+                                        topLeft = Offset(x = center.x - radius, y = center.y - radius),
+                                        size = Size(width = radius * 2, height = radius * 2)
+                                    )
 
-                                if (sweepAngle > 0 && (
-                                            // Normal case
-                                            (startAngle <= angleDegrees && angleDegrees < startAngle + sweepAngle) ||
-                                                    // Wrap-around case
-                                                    (startAngle <= angleDegrees + 360 && angleDegrees + 360 < startAngle + sweepAngle)
-                                            )) {
-                                    hoveredSegment = item
-                                    break
+                                    // Draw white outline
+                                    drawArc(
+                                        color = Color.White,
+                                        startAngle = startAngle,
+                                        sweepAngle = sweepAngle,
+                                        useCenter = true,
+                                        style = Stroke(width = 2f),
+                                        topLeft = Offset(x = center.x - radius, y = center.y - radius),
+                                        size = Size(width = radius * 2, height = radius * 2)
+                                    )
                                 }
 
                                 startAngle += sweepAngle
                             }
+
+                            // Draw inner circle for donut effect
+                            drawCircle(
+                                color = Color.White,
+                                radius = innerRadius,
+                                center = center
+                            )
                         }
                     }
-                }
-        ) {
-            val canvasWidth = size.width
-            val canvasHeight = size.height
-            val radius = minOf(canvasWidth, canvasHeight) / 2 * 0.8f
-            val center = Offset(x = canvasWidth / 2f, y = canvasHeight / 2f)
 
-            // Draw pie segments - start at 0 degrees (top)
-            var startAngle = 0f
-
-            data.forEach { item ->
-                val sweepAngle = (item.percentage * 3.6).toFloat()
-
-                if (sweepAngle > 0) {
-                    // Determine if segment is hovered
-                    val isHovered = item == hoveredSegment
-                    val segmentColor = if (isHovered) {
-                        item.color.copy(alpha = 1.0f)
-                    } else {
-                        item.color.copy(alpha = 0.85f)
-                    }
-
-                    // Draw segment
-                    drawArc(
-                        color = segmentColor,
-                        startAngle = startAngle,
-                        sweepAngle = sweepAngle,
-                        useCenter = true,
-                        topLeft = Offset(x = center.x - radius, y = center.y - radius),
-                        size = Size(width = radius * 2, height = radius * 2)
-                    )
-
-                    // Draw white outline
-                    drawArc(
-                        color = Color.White,
-                        startAngle = startAngle,
-                        sweepAngle = sweepAngle,
-                        useCenter = true,
-                        style = Stroke(width = 2f),
-                        topLeft = Offset(x = center.x - radius, y = center.y - radius),
-                        size = Size(width = radius * 2, height = radius * 2)
-                    )
-
-                    // Add segment highlight effect when hovered
-                    if (isHovered) {
-                        // Calculate midpoint angle for this segment
-                        val midAngle = startAngle + (sweepAngle / 2)
-                        val midAngleRad = Math.toRadians(midAngle.toDouble())
-                        val offsetDistance = 5f // How much to pop out
-
-                        val offsetX = (offsetDistance * cos(midAngleRad)).toFloat()
-                        val offsetY = (offsetDistance * sin(midAngleRad)).toFloat()
-
-                        drawArc(
-                            color = item.color,
-                            startAngle = startAngle,
-                            sweepAngle = sweepAngle,
-                            useCenter = true,
-                            topLeft = Offset(
-                                x = center.x - radius + offsetX,
-                                y = center.y - radius + offsetY
-                            ),
-                            size = Size(width = radius * 2, height = radius * 2)
-                        )
-                    }
-                }
-
-                startAngle += sweepAngle
-            }
-
-            // Draw inner circle for donut effect
-            drawCircle(
-                color = Color.White,
-                radius = radius * 0.6f,
-                center = center
-            )
-        }
-
-        // Show tooltip for hovered segment
-        hoveredSegment?.let { segment ->
-            Box(
-                modifier = Modifier
-                    .offset {
-                        IntOffset(
-                            x = mousePosition.x.toInt() + 12,
-                            y = mousePosition.y.toInt() - 40
-                        )
-                    }
-                    .background(
-                        color = Color.White,
-                        shape = RoundedCornerShape(4.dp)
-                    )
-                    .shadow(
-                        elevation = 4.dp,
-                        shape = RoundedCornerShape(4.dp)
-                    )
-                    .padding(8.dp)
-            ) {
-                Column {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(bottom = 4.dp)
+                    // Right side: Scrollable Legend
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
                     ) {
-                        // Color indicator
-                        Box(
-                            modifier = Modifier
-                                .size(12.dp)
-                                .background(segment.color, shape = CircleShape)
-                                .border(1.dp, Color.White, CircleShape)
-                        )
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(vertical = 4.dp)
+                        ) {
+                            items(displayData) { item ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Color indicator dot
+                                    Box(
+                                        modifier = Modifier
+                                            .size(10.dp)
+                                            .background(item.color, CircleShape)
+                                            .border(0.5.dp, Color.White, CircleShape)
+                                    )
 
-                        Spacer(modifier = Modifier.width(8.dp))
+                                    // Category name
+                                    Text(
+                                        text = " ${item.category}",
+                                        fontSize = 14.sp,
+                                        color = Color.DarkGray,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier
+                                            .padding(start = 8.dp)
+                                            .weight(1f)
+                                    )
 
-                        // Category name
-                        Text(
-                            text = segment.category,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
-                        )
+                                    // Percentage
+                                    Text(
+                                        text = "${String.format("%.1f", item.percentage)}%",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.DarkGray
+                                    )
+                                }
+                            }
+                        }
                     }
-
-                    // Amount and percentage
-                    Text(
-                        text = String.format("%.1f%%", segment.percentage),
-                        fontSize = 12.sp,
-                        color = Color.Gray
-                    )
                 }
             }
         }
     }
 }
+
 
 
 // Data class for chart items
