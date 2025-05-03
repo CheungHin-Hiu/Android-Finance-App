@@ -60,12 +60,12 @@ import kotlinx.coroutines.launch
 @Composable
 fun LoginScreen(
     navController: NavController,
+    dataStoreManager: DataStoreManager,
     modifier: Modifier = Modifier,
     loginViewModel: LoginViewModel = viewModel(factory = LoginViewModel.Factory),
 ) {
     val loginUiState = loginViewModel.loginUiState
     val context = LocalContext.current
-    val dataStoreManager = remember { DataStoreManager(context) }
     val coroutineScope = rememberCoroutineScope()
 
     var username by remember { mutableStateOf("") }
