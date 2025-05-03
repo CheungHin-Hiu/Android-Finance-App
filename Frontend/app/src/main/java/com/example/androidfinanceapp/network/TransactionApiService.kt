@@ -12,7 +12,9 @@ interface TransactionApiService {
     //get all transactions
     @GET("/transactions")
     suspend fun getTransactions(
-        @Body request: GetTransactionRequest
+        @Query("token") token: String,
+        @Query("startDate") startDate: String,
+        @Query("endDate") endDate: String
     ): Response<TransactionsResponse>
 
     //add transactions to db
@@ -54,11 +56,4 @@ data class AddTransactionRequest(
     @SerialName("date") val date: String,
     @SerialName("remark") val remark: String,
     @SerialName("created_at") val createdAt: String
-)
-
-@Serializable
-data class  GetTransactionRequest(
-    @SerialName("auth") val token: String,
-    @SerialName("startDate") val startDate: String,
-    @SerialName("endDate") val endDate: String
 )
