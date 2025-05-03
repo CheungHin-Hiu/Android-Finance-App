@@ -20,11 +20,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,6 +34,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -67,6 +72,7 @@ import androidx.navigation.NavController
 import com.example.androidfinanceapp.R
 import com.example.androidfinanceapp.data.DataStoreManager
 import com.example.androidfinanceapp.network.Transaction
+import com.example.androidfinanceapp.ui.Screens
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -298,101 +304,220 @@ fun OverviewScreen(
         // Fetch transactions for the selected month
         overviewViewModel.getTransactions(token.toString(), startDate, endDate)
     }
-    Scaffold(
-        // Remove default content padding from the scaffold
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        topBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .background(Color.White)
+
+    // Create NavigationDrawer
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet(
+                modifier = Modifier.width(280.dp),
+                drawerContainerColor = Color(0xFFF8F0FF) // Light purple background
             ) {
-                // Menu Icon aligned to the left
-                IconButton(
-                    onClick = { scope.launch { drawerState.open() } },
+                // App Name/Logo Area
+                Box(
                     modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(start = 8.dp)
+                        .fillMaxWidth()
+                        .padding(vertical = 24.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        Icons.Default.Menu,
-                        contentDescription = "Menu",
-                        tint = Color.Black
+                    Text(
+                        text = "Finance App",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF6200EE)
                     )
                 }
 
-                // "Overview" title centered exactly in the TopBar
-                Text(
-                    text = "Overview",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    color = Color.Black,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-
-                // Bottom divider line
+                // Divider
                 HorizontalDivider(
-                    modifier = Modifier.align(Alignment.BottomCenter),
                     thickness = 1.dp,
                     color = Color(0xFFE6E0F0)
                 )
-            }
-        },
-        floatingActionButton = {
-            var isPressed by remember { mutableStateOf(false) }
-            val elevation by animateDpAsState(
-                targetValue = if (isPressed) 2.dp else 6.dp,
-                label = "Button elevation"
-            )
 
-            Box(
-                modifier = Modifier
-                    .size(64.dp)
-                    .shadow(
-                        elevation = elevation,
-                        shape = CircleShape,
-                        spotColor = Color.Black.copy(alpha = 0.3f)
-                    )
-                    .clip(CircleShape)  // Ensure the touch area is circular
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onPress = {
-                                isPressed = true
-                                tryAwaitRelease()
-                                isPressed = false
-                            },
-                            onTap = { /* Navigate to income/expense screen */ }
+                // Navigation Items
+                NavigationDrawerItem(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    selected = true, // Overview is selected
+                    onClick = {
+                        scope.launch {
+                            drawerState.close()
+                        }
+                    },
+                    label = {
+                        Text(
+                            text = "Overview",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
                         )
                     }
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.add_icon),
-                    contentDescription = "Add Transaction",
-                    modifier = Modifier.fillMaxSize()
+                )
+
+                NavigationDrawerItem(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    selected = false,
+                    onClick = {
+                        scope.launch {
+                            drawerState.close()
+                            navController.navigate(Screens.TargetScreen.route)
+                        }
+                    },
+                    label = {
+                        Text(
+                            text = "Target",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                )
+
+                NavigationDrawerItem(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    selected = false,
+                    onClick = {
+                        scope.launch {
+                            drawerState.close()
+                            navController.navigate(Screens.StatisticScreen.route)
+                        }
+                    },
+
+                    label = {
+                        Text(
+                            text = "Assets Statistics",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                )
+
+
+                NavigationDrawerItem(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    selected = false,
+                    onClick = {
+                        scope.launch {
+                            drawerState.close()
+                            // Log out - clear token and navigate to login
+                            scope.launch {
+                                navController.navigate(Screens.LoginScreen.route)
+                            }
+                        }
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                            contentDescription = null,
+                        )
+                    },
+                    label = {
+                        Text(
+                            text = "Logout",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 )
             }
         }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            // Month selector tabs
-            MonthSelectorTabs(
-                selectedMonth = selectedMonth,
-                onMonthSelected = {
-                    selectedMonth = it
-                }
-            )
+    ) {
 
-            Box(
+
+        Scaffold(
+            // Remove default content padding from the scaffold
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            topBar = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .background(Color.White)
+                ) {
+                    // Menu Icon aligned to the left
+                    IconButton(
+                        onClick = { scope.launch { drawerState.open() } },
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .padding(start = 8.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Menu,
+                            contentDescription = "Menu",
+                            tint = Color.Black
+                        )
+                    }
+
+                    // "Overview" title centered exactly in the TopBar
+                    Text(
+                        text = "Overview",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        color = Color.Black,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+
+                    // Bottom divider line
+                    HorizontalDivider(
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        thickness = 1.dp,
+                        color = Color(0xFFE6E0F0)
+                    )
+                }
+            },
+            floatingActionButton = {
+                var isPressed by remember { mutableStateOf(false) }
+                val elevation by animateDpAsState(
+                    targetValue = if (isPressed) 2.dp else 6.dp,
+                    label = "Button elevation"
+                )
+
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .shadow(
+                            elevation = elevation,
+                            shape = CircleShape,
+                            spotColor = Color.Black.copy(alpha = 0.3f)
+                        )
+                        .clip(CircleShape)  // Ensure the touch area is circular
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onPress = {
+                                    isPressed = true
+                                    tryAwaitRelease()
+                                    isPressed = false
+                                },
+                                onTap = {
+                                    navController.navigate(Screens.IncomeAndExpenseScreen.route)
+                                }
+                            )
+                        }
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.add_icon),
+                        contentDescription = "Add Transaction",
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            }
+        ) { innerPadding ->
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(315.dp)
+                    .fillMaxSize()
+                    .padding(innerPadding)
             ) {
-                /*when (getTransactionState) {
+                // Month selector tabs
+                MonthSelectorTabs(
+                    selectedMonth = selectedMonth,
+                    onMonthSelected = {
+                        selectedMonth = it
+                    }
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(315.dp)
+                ) {
+                    /*when (getTransactionState) {
                     // When idle, show a loading indicator
                     is GetTransactionState.Idle -> {
                         CircularProgressIndicator(
@@ -488,22 +613,22 @@ fun OverviewScreen(
                         }
                     }
                 }*/
-                // For development with temp data, uncomment this:
-                TransactionCharts(transactions = transactions)
-            }
+                    // For development with temp data, uncomment this:
+                    TransactionCharts(transactions = transactions)
+                }
 
 
 
 
 
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                thickness = 1.dp,
-                color = Color(0xFFE6E0F0)
-            )
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    thickness = 1.dp,
+                    color = Color(0xFFE6E0F0)
+                )
 
-            // Transaction List - Handling different states
-            /*Box(
+                // Transaction List - Handling different states
+                /*Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
@@ -643,6 +768,7 @@ fun OverviewScreen(
         }
 
     }
+}
 
 @Composable
 fun MonthSelectorTabs(
