@@ -2,6 +2,7 @@ package com.example.androidfinanceapp.data
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -13,21 +14,27 @@ private val Context.dataStore by preferencesDataStore(name = "user_preferences")
 class DataStoreManager(private val context: Context) {
 
     companion object {
-        val EXTERNAL_ID_KEY = stringPreferencesKey("external_id")
+        val USER_ID = stringPreferencesKey("user_id")
+        val USER_NAME = stringPreferencesKey("user_name")
         val TOKEN_KEY = stringPreferencesKey("token")
     }
 
-    val externalIdFlow: Flow<String?> = context.dataStore.data.map { preferences ->
-        preferences[EXTERNAL_ID_KEY]
+    val userIdFlow: Flow<String?> = context.dataStore.data.map { preferences ->
+        preferences[USER_ID]
     }
 
     val tokenFlow: Flow<String?> = context.dataStore.data.map { preferences ->
         preferences[TOKEN_KEY]
     }
 
-    suspend fun saveLoginData(externalId: String, token: String) {
+    val usernameFlow: Flow<String?> = context.dataStore.data.map { preferences ->
+        preferences[USER_NAME]
+    }
+
+    suspend fun saveLoginData(userId: String, userName: String, token: String) {
         context.dataStore.edit { preferences ->
-            preferences[EXTERNAL_ID_KEY] = externalId
+            preferences[USER_ID] = userId
+            preferences[USER_NAME] = userName
             preferences[TOKEN_KEY] = token
         }
     }
