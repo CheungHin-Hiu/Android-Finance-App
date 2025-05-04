@@ -21,6 +21,7 @@ import com.example.androidfinanceapp.ui.Overview.OverviewScreen
 import com.example.androidfinanceapp.ui.Screens
 import com.example.androidfinanceapp.ui.login.LoginScreen
 import com.example.androidfinanceapp.ui.signup.SignupScreen
+import com.example.androidfinanceapp.ui.target.TargetScreen
 import com.example.androidfinanceapp.ui.theme.AndroidFinanceAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -61,6 +62,10 @@ fun TopFinanceApp() {
                     dataStoreManager = dataStoreManager,
                 )
             }
+            composable(Screens.TargetScreen.route){
+                TargetScreen(navController,dataStoreManager)
+            }
+
         }
     }
 }
