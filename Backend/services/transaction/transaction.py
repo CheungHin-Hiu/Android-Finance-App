@@ -17,7 +17,7 @@ class TransactionController():
         cursor = self._transaction_collection.find({"user_id": user_id}).sort("datetime", -1)
         transactions = list(cursor)
         for transaction in transactions:
-            transaction["_id"] = str(transaction["_id"])
+            transaction["transaction_id"] = str(transaction["_id"])
             if "datetime" in transaction:
                 transaction["datetime"] = transaction["datetime"].isoformat()
 
