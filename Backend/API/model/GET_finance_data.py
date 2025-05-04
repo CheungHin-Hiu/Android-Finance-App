@@ -14,3 +14,5 @@ class ResponseFinanceData(BaseModel):
     currency: list[dict[str, Any]] | None = None
     stock: list[dict[str, Any]] | None = None
     crypto: list[dict[str, Any]] | None = None
+
+    
