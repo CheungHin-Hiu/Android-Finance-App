@@ -40,7 +40,6 @@ data class Transaction(
     @SerialName("amount") val amount: Double,
     @SerialName("local_amount") val localAmount: Double,
     @SerialName("date") val date: String,
-    @SerialName("remark") val remark: String,
     @SerialName("created_at") val createdAt: String
 )
 
@@ -54,6 +53,5 @@ data class AddTransactionRequest(
     @SerialName("currency_type") val currencyType: String,
     @SerialName("amount") val amount: Double,
     @SerialName("date") val date: String,
-    @SerialName("remark") val remark: String,
     @SerialName("created_at") val createdAt: String
 )

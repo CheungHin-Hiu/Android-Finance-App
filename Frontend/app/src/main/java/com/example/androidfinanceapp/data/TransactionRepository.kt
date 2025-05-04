@@ -18,7 +18,6 @@ interface TransactionRepository {
         currencyType: String,
         amount: Double,
         date: String,
-        remark: String,
         createAt: String
     ): Response<Unit>
 }
@@ -46,7 +45,6 @@ class NetworkTransactionRepository(
         currencyType: String,
         amount: Double,
         date: String,
-        remark: String,
         createAt: String
     ): Response<Unit> =
         transactionApiService.addTransaction(
@@ -57,7 +55,6 @@ class NetworkTransactionRepository(
                 currencyType = currencyType,
                 amount = amount,
                 date = date,
-                remark = remark,
                 createdAt = createAt
             )
         )
