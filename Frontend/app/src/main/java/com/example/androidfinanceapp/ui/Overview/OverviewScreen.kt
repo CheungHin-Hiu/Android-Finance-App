@@ -73,6 +73,8 @@ import com.example.androidfinanceapp.R
 import com.example.androidfinanceapp.data.DataStoreManager
 import com.example.androidfinanceapp.network.Transaction
 import com.example.androidfinanceapp.ui.Screens
+import com.example.androidfinanceapp.ui.common.AppNavigationDrawer
+import com.example.androidfinanceapp.ui.common.ScreenTopBar
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -99,7 +101,7 @@ fun OverviewScreen(
                 amount = 40.50,
                 localAmount = 40.50,
                 date = "2/5/2025",
-                remark = "",
+
                 createdAt = "2/5/2025"
             ),
             Transaction(
@@ -109,7 +111,7 @@ fun OverviewScreen(
                 amount = 5.00,
                 localAmount = 50.50,
                 date = "2/5/2025",
-                remark = "",
+
                 createdAt = "2/5/2025"
             ),
             Transaction(
@@ -119,7 +121,7 @@ fun OverviewScreen(
                 amount = 40.50,
                 localAmount = 60.50,
                 date = "1/5/2025",
-                remark = "",
+
                 createdAt = "3/5/2025"
             ),
             Transaction(
@@ -129,7 +131,7 @@ fun OverviewScreen(
                 amount = 40.50,
                 localAmount = 60.50,
                 date = "1/5/2025",
-                remark = "",
+
                 createdAt = "3/5/2025"
             ),
             Transaction(
@@ -139,7 +141,7 @@ fun OverviewScreen(
                 amount = 40.50,
                 localAmount = 60.50,
                 date = "1/5/2025",
-                remark = "",
+
                 createdAt = "3/5/2025"
             ),
             Transaction(
@@ -149,7 +151,6 @@ fun OverviewScreen(
                 amount = 40.50,
                 localAmount = 60.50,
                 date = "1/5/2025",
-                remark = "",
                 createdAt = "3/5/2025"
             ),
             Transaction(
@@ -159,7 +160,7 @@ fun OverviewScreen(
                 amount = 40.50,
                 localAmount = 60.50,
                 date = "1/5/2025",
-                remark = "",
+
                 createdAt = "3/5/2025"
             ),
             // More transactions can be added here
@@ -170,7 +171,7 @@ fun OverviewScreen(
                 amount = 40.50,
                 localAmount = 60.50,
                 date = "1/5/2025",
-                remark = "",
+
                 createdAt = "3/5/2025"
             ),
             Transaction(
@@ -180,7 +181,7 @@ fun OverviewScreen(
                 amount = 40.50,
                 localAmount = 60.50,
                 date = "1/5/2025",
-                remark = "",
+
                 createdAt = "3/5/2025"
             ),
             Transaction(
@@ -190,7 +191,7 @@ fun OverviewScreen(
                 amount = 40.50,
                 localAmount = 60.50,
                 date = "1/5/2025",
-                remark = "",
+
                 createdAt = "3/5/2025"
             ),
             Transaction(
@@ -200,7 +201,7 @@ fun OverviewScreen(
                 amount = 40.50,
                 localAmount = 60.50,
                 date = "1/5/2025",
-                remark = "",
+
                 createdAt = "3/5/2025"
             ),
             Transaction(
@@ -210,7 +211,6 @@ fun OverviewScreen(
                 amount = 40.50,
                 localAmount = 60.50,
                 date = "1/5/2025",
-                remark = "",
                 createdAt = "3/5/2025"
             ),
             Transaction(
@@ -220,7 +220,6 @@ fun OverviewScreen(
                 amount = 40.50,
                 localAmount = 60.50,
                 date = "1/5/2025",
-                remark = "",
                 createdAt = "3/5/2025"
             ),
             Transaction(
@@ -230,7 +229,6 @@ fun OverviewScreen(
                 amount = 40.50,
                 localAmount = 60.50,
                 date = "1/5/2025",
-                remark = "",
                 createdAt = "3/5/2025"
             ),
             Transaction(
@@ -240,7 +238,6 @@ fun OverviewScreen(
                 amount = 40.50,
                 localAmount = 60.50,
                 date = "1/5/2025",
-                remark = "",
                 createdAt = "3/5/2025"
             ),
             Transaction(
@@ -250,7 +247,6 @@ fun OverviewScreen(
                 amount = 40.50,
                 localAmount = 60.50,
                 date = "1/5/2025",
-                remark = "",
                 createdAt = "3/5/2025"
             ),
             Transaction(
@@ -260,7 +256,6 @@ fun OverviewScreen(
                 amount = 40.50,
                 localAmount = 60.50,
                 date = "1/5/2025",
-                remark = "",
                 createdAt = "3/5/2025"
             ),
             Transaction(
@@ -270,7 +265,6 @@ fun OverviewScreen(
                 amount = 40.50,
                 localAmount = 60.50,
                 date = "1/5/2025",
-                remark = "",
                 createdAt = "3/5/2025"
             ),
             Transaction(
@@ -280,7 +274,6 @@ fun OverviewScreen(
                 amount = 40.50,
                 localAmount = 60.50,
                 date = "1/5/2025",
-                remark = "",
                 createdAt = "3/5/2025"
             ),
         )
@@ -306,161 +299,19 @@ fun OverviewScreen(
     }
 
     // Create NavigationDrawer
-    ModalNavigationDrawer(
+    AppNavigationDrawer(
+        navController = navController,
         drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet(
-                modifier = Modifier.width(280.dp),
-                drawerContainerColor = Color(0xFFF8F0FF) // Light purple background
-            ) {
-                // App Name/Logo Area
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Finance App",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF6200EE)
-                    )
-                }
-
-                // Divider
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    color = Color(0xFFE6E0F0)
-                )
-
-                // Navigation Items
-                NavigationDrawerItem(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    selected = true, // Overview is selected
-                    onClick = {
-                        scope.launch {
-                            drawerState.close()
-                        }
-                    },
-                    label = {
-                        Text(
-                            text = "Overview",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                )
-
-                NavigationDrawerItem(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    selected = false,
-                    onClick = {
-                        scope.launch {
-                            drawerState.close()
-                            navController.navigate(Screens.TargetScreen.route)
-                        }
-                    },
-                    label = {
-                        Text(
-                            text = "Target",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                )
-
-                NavigationDrawerItem(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    selected = false,
-                    onClick = {
-                        scope.launch {
-                            drawerState.close()
-                            navController.navigate(Screens.StatisticScreen.route)
-                        }
-                    },
-
-                    label = {
-                        Text(
-                            text = "Assets Statistics",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                )
-
-
-                NavigationDrawerItem(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    selected = false,
-                    onClick = {
-                        scope.launch {
-                            drawerState.close()
-                            // Log out - clear token and navigate to login
-                            scope.launch {
-                                navController.navigate(Screens.LoginScreen.route)
-                            }
-                        }
-                    },
-                    icon = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                            contentDescription = null,
-                        )
-                    },
-                    label = {
-                        Text(
-                            text = "Logout",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                )
-            }
-        }
+        scope = scope,
+        currentScreen = Screens.OverviewScreen
     ) {
-
-
         Scaffold(
             // Remove default content padding from the scaffold
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             topBar = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .background(Color.White)
-                ) {
-                    // Menu Icon aligned to the left
-                    IconButton(
-                        onClick = { scope.launch { drawerState.open() } },
-                        modifier = Modifier
-                            .align(Alignment.CenterStart)
-                            .padding(start = 8.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.Menu,
-                            contentDescription = "Menu",
-                            tint = Color.Black
-                        )
-                    }
-
-                    // "Overview" title centered exactly in the TopBar
-                    Text(
-                        text = "Overview",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
-                        color = Color.Black,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-
-                    // Bottom divider line
-                    HorizontalDivider(
-                        modifier = Modifier.align(Alignment.BottomCenter),
-                        thickness = 1.dp,
-                        color = Color(0xFFE6E0F0)
-                    )
-                }
+                ScreenTopBar(
+                    drawerState = drawerState, scope = scope, currentScreen = Screens.OverviewScreen
+                )
             },
             floatingActionButton = {
                 var isPressed by remember { mutableStateOf(false) }
@@ -757,16 +608,12 @@ fun OverviewScreen(
                             currencyType = transaction.currencyType,
                             amount = transaction.amount,
                             date = transaction.date,
-                            remark = transaction.remark,
                             createdAt = transaction.createdAt
                         )
                     }
                 }
-
-
             }
         }
-
     }
 }
 
@@ -832,7 +679,6 @@ fun TransactionItem(
     currencyType: String,
     amount: Double,
     date: String,
-    remark: String,
     createdAt: String
 ) {
     Column(
