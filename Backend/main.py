@@ -43,12 +43,3 @@ api_router = APIRouter()
 APIRouteDefintion(api_router, client)
 app.include_router(api_router)
 
-
-
-
-
-
-
-
-
-

@@ -10,11 +10,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.androidfinanceapp.data.DataStoreManager
 import com.example.androidfinanceapp.ui.Overview.IncomeAndExpenseScreen
+import com.example.androidfinanceapp.ui.Overview.IncomeAndExpenseViewModel
 import com.example.androidfinanceapp.ui.Overview.OverviewScreen
 import com.example.androidfinanceapp.ui.Screens
 import com.example.androidfinanceapp.ui.login.LoginScreen
@@ -42,7 +44,7 @@ fun TopFinanceApp() {
     Scaffold { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = Screens.OverviewScreen.route,
+            startDestination = Screens.LoginScreen.route,
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
             composable(Screens.LoginScreen.route) {
@@ -55,7 +57,10 @@ fun TopFinanceApp() {
                 OverviewScreen(navController, dataStoreManager)
             }
             composable(Screens.IncomeAndExpenseScreen.route){
-                IncomeAndExpenseScreen(navController,dataStoreManager)
+                IncomeAndExpenseScreen(
+                    navController = navController,
+                    dataStoreManager = dataStoreManager,
+                )
             }
             composable(Screens.TargetScreen.route){
                 TargetScreen(navController,dataStoreManager)

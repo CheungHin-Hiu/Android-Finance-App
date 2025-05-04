@@ -15,7 +15,7 @@ interface AppContainer {
 
 // Implementation of the dependency injection container
 class DefaultAppContainer: AppContainer {
-    private val baseUrl = "https://localhost:1234/"
+    private val baseUrl = "http://10.0.2.2:8000/"
 
     private val json = Json { ignoreUnknownKeys = true}
     private val retrofit: Retrofit = Retrofit.Builder()

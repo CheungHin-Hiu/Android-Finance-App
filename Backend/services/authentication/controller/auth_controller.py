@@ -65,7 +65,7 @@ class LoginController(AuthController):
        
              return {"status": 500, 'error': 'internal server error'}
 
-        return { 'status':200, 'user_id': user_id,'username': username, 'token': new_token}
+        return { 'status':200, 'user_id': str(user_id),'username': username, 'token': new_token}
 
 
         
@@ -108,6 +108,6 @@ class RegisterController(AuthController):
             'username': str(username)
         }
         new_token = self.token_generator.create_jwt_token(token_generator_payload)
-        return {'status': 200, 'user_id': user_id,'username': username, 'token':new_token}
+        return {'status': 200, 'user_id': str(user_id),'username': username, 'token':new_token}
 
         
