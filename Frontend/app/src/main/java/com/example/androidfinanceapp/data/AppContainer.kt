@@ -1,5 +1,6 @@
 package com.example.androidfinanceapp.data
 
+import com.example.androidfinanceapp.network.AssetAPiService
 import com.example.androidfinanceapp.network.AuthApiService
 import com.example.androidfinanceapp.network.TransactionApiService
 import retrofit2.Retrofit
@@ -11,6 +12,7 @@ import okhttp3.MediaType.Companion.toMediaType
 interface AppContainer {
     val authRepository: AuthRepository
     val transactionRepository: TransactionRepository
+    val assetRepository: AssetRepository
 }
 
 // Implementation of the dependency injection container
@@ -31,6 +33,10 @@ class DefaultAppContainer: AppContainer {
         retrofit.create(TransactionApiService::class.java)
     }
 
+    private val assetService: AssetAPiService by lazy {
+        retrofit.create(AssetAPiService::class.java)
+    }
+
     override val authRepository: AuthRepository by lazy {
         NetworkAuthRepository(authService)
     }
@@ -38,4 +44,9 @@ class DefaultAppContainer: AppContainer {
     override val transactionRepository: TransactionRepository by lazy {
         NetworkTransactionRepository(transactionService)
     }
+
+    override val assetRepository: AssetRepository by lazy {
+        NetworkAssetRepository(assetService)
+    }
+
 }
