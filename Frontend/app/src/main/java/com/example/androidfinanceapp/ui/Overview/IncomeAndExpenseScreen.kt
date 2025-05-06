@@ -44,6 +44,7 @@ import com.example.androidfinanceapp.data.DataStoreManager
 import com.example.androidfinanceapp.R
 import com.example.androidfinanceapp.ui.common.CategoryGrid
 import com.example.androidfinanceapp.ui.common.CategoryItem
+import com.example.androidfinanceapp.ui.common.DatePickerRow
 import com.example.androidfinanceapp.ui.common.KeypadGrid
 import com.example.androidfinanceapp.ui.common.ManageScreenTopAppBar
 import com.example.androidfinanceapp.ui.common.evaluateExpression
@@ -91,7 +92,7 @@ fun IncomeAndExpenseScreen(
             CategoryItem(1, R.drawable.transport, "Transport"),
             CategoryItem(2, R.drawable.food, "Food & Drink"),
             CategoryItem(3, R.drawable.entertainment, "Entertainment"),
-            CategoryItem(4, R.drawable.rent, "Rent"),
+            CategoryItem(4, R.drawable.real_estate, "Rent"),
             CategoryItem(5, R.drawable.medicine, "Medicine"),
             CategoryItem(6, R.drawable.shopping, "Shopping"),
             CategoryItem(7, R.drawable.networking, "Networking"),
@@ -104,7 +105,7 @@ fun IncomeAndExpenseScreen(
             CategoryItem(1, R.drawable.salary, "Salary"),
             CategoryItem(2, R.drawable.dividend, "Dividend"),
             CategoryItem(3, R.drawable.interest, "Interest"),
-            CategoryItem(4, R.drawable.rent, "Rent"),
+            CategoryItem(4, R.drawable.real_estate, "Rent"),
             CategoryItem(5, R.drawable.loyalty, "Loyalty"),
             CategoryItem(6, R.drawable.gift, "Gift"),
             CategoryItem(7, R.drawable.other, "Other"),
@@ -216,8 +217,6 @@ fun IncomeAndExpenseScreen(
 
     }
 
-
-
     Scaffold(
         topBar = {
             ManageScreenTopAppBar(
@@ -245,6 +244,7 @@ fun IncomeAndExpenseScreen(
                 selectedCategory = selectedCategory,
                 onCategorySelected = { category ->
                     selectedCategory = category
+                    amount = "0.0"
                 },
                 modifier = modifier.padding(start = 10.dp)
             )
@@ -268,7 +268,6 @@ fun IncomeAndExpenseScreen(
                 Row(
                     modifier = Modifier
                         .weight(1f),
-
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -350,7 +349,8 @@ fun IncomeAndExpenseScreen(
                 thickness = 2.dp,
                 color = Color.Black
             )
-            // In the IncomeAndExpenseScreen, modify the Box that contains the calculator
+            // In the IncomeA
+            // ndExpenseScreen, modify the Box that contains the calculator
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -367,74 +367,12 @@ fun IncomeAndExpenseScreen(
 
                 ) {
                     // State for date picker
-                    var showDatePicker by remember { mutableStateOf(false) }
-
-                    // Date picker row
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(28.dp))
-                            .background(Color.White)
-                            .padding(vertical = 12.dp, horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Calendar icon with date picker
-                        Icon(
-                            imageVector = Icons.Default.DateRange,
-                            contentDescription = "Select Date",
-                            tint = Color.Black,
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clickable { showDatePicker = true }
-                        )
-
-                        Spacer(modifier = Modifier.width(175.dp))
-
-                        // Date text
-                        Text(
-                            text = selectedDate,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-
-                    // Date picker dialog
-                    if (showDatePicker) {
-                        val context = LocalContext.current
-                        val calendar = Calendar.getInstance()
-
-                        val datePickerDialog = DatePickerDialog(
-                            context,
-                            { _, year, month, day ->
-                                calendar.set(year, month, day)
-                                val dayOfWeek = when(calendar.get(Calendar.DAY_OF_WEEK)) {
-                                    Calendar.MONDAY -> "Mon"
-                                    Calendar.TUESDAY -> "Tue"
-                                    Calendar.WEDNESDAY -> "Wed"
-                                    Calendar.THURSDAY -> "Thu"
-                                    Calendar.FRIDAY -> "Fri"
-                                    Calendar.SATURDAY -> "Sat"
-                                    else -> "Sun"
-                                }
-
-                                // Format the date
-                                val formattedDate = "${year}/${month+1}/${day}($dayOfWeek)"
-                                selectedDate = formattedDate
-                                // Update the date in the view model if needed
-                                // incomeAndExpenseViewModel.setTransactionDate(formattedDate)
-                                showDatePicker = false
-                            },
-                            calendar.get(Calendar.YEAR),
-                            calendar.get(Calendar.MONTH),
-                            calendar.get(Calendar.DAY_OF_MONTH)
-                        )
-
-                        // Show the dialog
-                        LaunchedEffect(showDatePicker) {
-                            datePickerDialog.show()
+                    DatePickerRow(
+                        selectedDate = selectedDate,
+                        onDateSelected = { newDate ->
+                            selectedDate = newDate
                         }
-                    }
+                    )
 
                     Spacer(modifier = Modifier.height(40.dp))
 
@@ -446,7 +384,8 @@ fun IncomeAndExpenseScreen(
                         onOkPressed = {
                             // Call the function to add transaction when OK is pressed
                             addTransaction()
-                        }
+                        },
+                        key = selectedCategory
                     )
                 }
             }

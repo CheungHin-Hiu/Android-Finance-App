@@ -29,10 +29,11 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun KeypadGrid(
     onAmountChanged: (String) -> Unit,
-    onOkPressed: () -> Unit
+    onOkPressed: () -> Unit,
+    key: CategoryItem?
 ) {
     // State for the amount input
-    var amountValue by remember { mutableStateOf("") }
+    var amountValue by remember(key) { mutableStateOf("") }
 
     // Handle button clicks
     fun handleButtonClick(value: String) {
