@@ -32,6 +32,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -51,6 +52,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.androidfinanceapp.data.DataStoreManager
 import com.example.androidfinanceapp.ui.Screens
@@ -60,6 +62,10 @@ import com.example.androidfinanceapp.ui.theme.ErrorButton
 import kotlin.math.min
 import kotlin.math.roundToInt
 
+sealed class TargetType(val name: String, val primary_color: Long, val secondary_color: Long) {
+    object Saving : TargetType("Saving", 0xFF5C0A0A, 0xFFFCCACA)
+    object Budget : TargetType("Budget", 0xFF4B27B8, 0xFFC7B6FC)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,7 +73,15 @@ fun TargetScreen(
     navController: NavController,
     dataStoreManager: DataStoreManager,
     modifier: Modifier = Modifier,
+    targetViewModel: TargetViewModel = viewModel(
+        factory = TargetViewModel.Factory
+    )
 ) {
+    // set idle
+    targetViewModel.setGetIdle()
+
+    val token by dataStoreManager.tokenFlow.collectAsState(initial = null)
+
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -78,6 +92,8 @@ fun TargetScreen(
     var savingTarget by remember { mutableFloatStateOf(0f) }
     var budgetAmount by remember { mutableFloatStateOf(0f) }
     var budgetTarget by remember { mutableFloatStateOf(0f) }
+
+    // handle target state changes
 
     AppNavigationDrawer(
         navController = navController,
@@ -158,11 +174,6 @@ fun TargetScreen(
             }
         }
     }
-}
-
-sealed class TargetType(val name: String, val primary_color: Long, val secondary_color: Long) {
-    object Saving : TargetType("Saving", 0xFF5C0A0A, 0xFFFCCACA)
-    object Budget : TargetType("Budget", 0xFF4B27B8, 0xFFC7B6FC)
 }
 
 @Composable

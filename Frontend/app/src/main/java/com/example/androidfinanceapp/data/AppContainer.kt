@@ -2,6 +2,7 @@ package com.example.androidfinanceapp.data
 
 import com.example.androidfinanceapp.network.AssetAPiService
 import com.example.androidfinanceapp.network.AuthApiService
+import com.example.androidfinanceapp.network.TargetApiService
 import com.example.androidfinanceapp.network.TransactionApiService
 import retrofit2.Retrofit
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -13,6 +14,7 @@ interface AppContainer {
     val authRepository: AuthRepository
     val transactionRepository: TransactionRepository
     val assetRepository: AssetRepository
+    val targetRepository: TargetRepository
 }
 
 // Implementation of the dependency injection container
@@ -37,6 +39,10 @@ class DefaultAppContainer: AppContainer {
         retrofit.create(AssetAPiService::class.java)
     }
 
+    private val targetService: TargetApiService by lazy {
+        retrofit.create(TargetApiService::class.java)
+    }
+
     override val authRepository: AuthRepository by lazy {
         NetworkAuthRepository(authService)
     }
@@ -49,4 +55,7 @@ class DefaultAppContainer: AppContainer {
         NetworkAssetRepository(assetService)
     }
 
+    override val targetRepository: TargetRepository by lazy {
+        NetworkTargetRepository(targetService)
+    }
 }
