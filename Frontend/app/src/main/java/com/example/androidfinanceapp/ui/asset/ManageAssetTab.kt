@@ -57,13 +57,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.androidfinanceapp.R
 
-data class Asset(
-    val description: String,
-    val amount: String,
-    val value: String,
-    val createdAt: String,
-    val updatedAt: String,
-)
 
 val assetList = mutableListOf(
     Asset("Stock: AAPL", amount = "100 Stock", value = "100 USD",

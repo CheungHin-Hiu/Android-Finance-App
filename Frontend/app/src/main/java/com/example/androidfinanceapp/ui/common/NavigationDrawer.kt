@@ -102,11 +102,11 @@ fun AppNavigationDrawer(
                 // Navigation Items (Statistic)
                 NavigationDrawerItem(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    selected = currentScreen is Screens.StatisticScreen,
+                    selected = currentScreen is Screens.AssetStatisticScreen,
                     onClick = {
                         scope.launch {
                             drawerState.close()
-                            navController.navigate(Screens.StatisticScreen.route)
+                            navController.navigate(Screens.AssetStatisticScreen.route)
                         }
                     },
 
