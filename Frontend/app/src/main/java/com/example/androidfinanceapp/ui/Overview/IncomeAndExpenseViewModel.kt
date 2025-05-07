@@ -30,11 +30,10 @@ class IncomeAndExpenseViewModel(private val transactionRepository: TransactionRe
         currencyType: String,
         amount: Double,
         date: String,
-        remark: String,
         createdAt: String){
         viewModelScope.launch {
             try {
-                val response = transactionRepository.addTransaction(token,type,categoryType,currencyType,amount,date,remark,createdAt)
+                val response = transactionRepository.addTransaction(token,type,categoryType,currencyType,amount,date,createdAt)
                 if(response.isSuccessful){
                     response.body()?.let {
                         addTransactionState = AddTransactionState.Success
