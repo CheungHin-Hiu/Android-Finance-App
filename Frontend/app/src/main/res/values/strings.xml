@@ -23,4 +23,6 @@
     <string name="delete_button">Delete</string>
     <string name="modify_button">Modify</string>
     <string name="enter_new_amount_placeholder">Enter new amount</string>
+    <string name="total_assets_title">Total Assets</string>
+    <string name="asset_statistics_title">Asset Statistics</string>
 </resources>

@@ -20,6 +20,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.androidfinanceapp.R
+import com.example.androidfinanceapp.data.DataStoreManager
 import com.example.androidfinanceapp.ui.common.ManageScreenTopAppBar
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -27,8 +28,8 @@ import kotlinx.coroutines.flow.flowOf
 @Composable
 fun AssetManagementScreen(
     navController: NavController,
-    dataStoreManager: MockDataStoreManager,
-    modifier: Modifier,
+    dataStoreManager: DataStoreManager,
+    modifier: Modifier = Modifier,
     manageAssetViewModel: ManageAssetViewModel = viewModel(factory = ManageAssetViewModel.Factory)
 ) {
     // Get the JWT token from data store
@@ -72,25 +73,4 @@ fun AssetManagementScreen(
             }
         }
     }
-}
-
-
-interface MockDataStoreManager {
-    val tokenFlow: Flow<String?>
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewAssetManagementScreen(){
-    val mockNavController = rememberNavController()
-    // Mock DataStoreManager
-    val mockDataStoreManager = object : MockDataStoreManager{
-        override val tokenFlow: Flow<String?> = flowOf("mockToken")
-    }
-
-    AssetManagementScreen(
-        navController = mockNavController,
-        dataStoreManager = mockDataStoreManager,
-        modifier = Modifier
-    )
 }
