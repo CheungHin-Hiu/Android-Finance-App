@@ -45,6 +45,7 @@ fun ScreenTopBar(
     val screenTitle = when(currentScreen) {
         is Screens.OverviewScreen -> "Overview";
         is Screens.TargetScreen -> "Target";
+        is Screens.AssetStatisticScreen -> "Asset";
         else -> "Title"
     }
 
