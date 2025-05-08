@@ -1,3 +1,28 @@
 <resources>
     <string name="app_name">Android Finance App</string>
+    <string name="top_finance">Top Finance</string>
+    <string name="enter_user_name">Enter user name</string>
+    <string name="enter_password">Enter password</string>
+    <string name="login_button_text">Login</string>
+    <string name="reenter_password">Re-enter password</string>
+    <string name="sign_up">Sign up</string>
+    <string name="return_login_button_text">Return to login</string>
+    <string name="top_finance_logo">Top Finance Logo</string>
+    <string name="dismiss_button">Dismiss</string>
+    <string name="return_login_button">Return to login page</string>
+    <string name="sign_up_success_dialog">Sign up success</string>
+    <string name="back_button_text">Back</string>
+    <string name="more_options_button_description">More Options</string>
+    <string name="add_asset_tab_text">Add</string>
+    <string name="manage_asset_tab_text">Manage</string>
+    <string name="dropdown_arrow_content_description">Dropdown arrow</string>
+    <string name="asset_type_dropdown_label">Asset type</string>
+    <string name="time_dropdown_label">Time</string>
+    <string name="modify_amount_of_asset_text_field">Modify amount of asset</string>
+    <string name="manage_button">Manage</string>
+    <string name="delete_button">Delete</string>
+    <string name="modify_button">Modify</string>
+    <string name="enter_new_amount_placeholder">Enter new amount</string>
+    <string name="total_assets_title">Total Assets</string>
+    <string name="asset_statistics_title">Asset Statistics</string>
 </resources>

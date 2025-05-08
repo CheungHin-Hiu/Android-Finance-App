@@ -4,13 +4,26 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.androidfinanceapp.data.DataStoreManager
+import com.example.androidfinanceapp.ui.Overview.IncomeAndExpenseScreen
+import com.example.androidfinanceapp.ui.Overview.IncomeAndExpenseViewModel
+import com.example.androidfinanceapp.ui.Overview.OverviewScreen
+import com.example.androidfinanceapp.ui.Screens
+import com.example.androidfinanceapp.ui.asset.AssetManagementScreen
+import com.example.androidfinanceapp.ui.asset.AssetStatisticsScreen
+import com.example.androidfinanceapp.ui.login.LoginScreen
+import com.example.androidfinanceapp.ui.signup.SignupScreen
+import com.example.androidfinanceapp.ui.target.TargetScreen
 import com.example.androidfinanceapp.ui.theme.AndroidFinanceAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,29 +32,55 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AndroidFinanceAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+               TopFinanceApp()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+fun TopFinanceApp() {
+    val context = LocalContext.current
+    val dataStoreManager = remember { DataStoreManager(context) }
+    val navController = rememberNavController()
+    Scaffold { paddingValues ->
+        NavHost(
+            navController = navController,
+            startDestination = Screens.LoginScreen.route,
+            modifier = Modifier.padding(paddingValues = paddingValues)
+        ) {
+            composable(Screens.LoginScreen.route) {
+                LoginScreen(navController, dataStoreManager)
+            }
+            composable(Screens.SignupScreen.route) {
+                SignupScreen(navController)
+            }
+            composable(Screens.OverviewScreen.route){
+                OverviewScreen(navController = navController,
+                    dataStoreManager = dataStoreManager,)
+            }
+            composable(Screens.IncomeAndExpenseScreen.route){
+                IncomeAndExpenseScreen(
+                    navController = navController,
+                    dataStoreManager = dataStoreManager,
+                )
+            }
+            composable(Screens.TargetScreen.route){
+                TargetScreen(navController,dataStoreManager)
+            }
+            composable(Screens.AssetStatisticScreen.route) {
+                AssetStatisticsScreen(
+                    navController = navController,
+                    dataStoreManager = dataStoreManager,
+                )
+            }
+            composable(Screens.AssetManagementScreen.route) {
+                AssetManagementScreen(
+                    navController = navController,
+                    dataStoreManager = dataStoreManager,
+                )
+            }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AndroidFinanceAppTheme {
-        Greeting("Android")
+        }
     }
 }
