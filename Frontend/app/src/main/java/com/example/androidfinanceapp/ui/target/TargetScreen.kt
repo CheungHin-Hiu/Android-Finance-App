@@ -1,6 +1,7 @@
 package com.example.androidfinanceapp.ui.target
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,23 +12,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -43,16 +49,23 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.androidfinanceapp.data.DataStoreManager
 import com.example.androidfinanceapp.ui.Screens
 import com.example.androidfinanceapp.ui.common.AppNavigationDrawer
 import com.example.androidfinanceapp.ui.common.ScreenTopBar
+import com.example.androidfinanceapp.ui.theme.ErrorButton
 import kotlin.math.min
 import kotlin.math.roundToInt
 
+sealed class TargetType(val name: String, val primary_color: Long, val secondary_color: Long) {
+    object Saving : TargetType("Saving", 0xFF5C0A0A, 0xFFFCCACA)
+    object Budget : TargetType("Budget", 0xFF4B27B8, 0xFFC7B6FC)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,7 +73,15 @@ fun TargetScreen(
     navController: NavController,
     dataStoreManager: DataStoreManager,
     modifier: Modifier = Modifier,
+    targetViewModel: TargetViewModel = viewModel(
+        factory = TargetViewModel.Factory
+    )
 ) {
+    // set idle
+    targetViewModel.setGetIdle()
+
+    val token by dataStoreManager.tokenFlow.collectAsState(initial = null)
+
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -71,6 +92,8 @@ fun TargetScreen(
     var savingTarget by remember { mutableFloatStateOf(0f) }
     var budgetAmount by remember { mutableFloatStateOf(0f) }
     var budgetTarget by remember { mutableFloatStateOf(0f) }
+
+    // handle target state changes
 
     AppNavigationDrawer(
         navController = navController,
@@ -121,12 +144,18 @@ fun TargetScreen(
                 }
 
                 // set target
-                Button(onClick = { showBottomSheet = true }) {
-                    Text("Set a New Target")
+                Button(
+                    onClick = { showBottomSheet = true },
+                    modifier = Modifier.width(200.dp)
+                ) {
+                    Text("Create New Target")
                 }
 
                 // remove target
-                Button(onClick = { }) {
+                Button(
+                    onClick = { },
+                    modifier = Modifier.width(200.dp)
+                ) {
                     Text("Remove Targets")
                 }
             }
@@ -140,16 +169,11 @@ fun TargetScreen(
                     sheetState = sheetState
                 ) {
                     // Sheet content
-                    NewTargetForm()
+                    NewTargetForm(onDismiss = { showBottomSheet = false })
                 }
             }
         }
     }
-}
-
-sealed class TargetType(val name: String, val primary_color: Long, val secondary_color: Long) {
-    object Saving : TargetType("Saving", 0xFF5C0A0A, 0xFFFCCACA)
-    object Budget : TargetType("Budget", 0xFF4B27B8, 0xFFC7B6FC)
 }
 
 @Composable
@@ -222,11 +246,19 @@ fun TargetProgressCircle(targetType: TargetType, currentAmount: Float, target: F
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewTargetForm() {
+fun NewTargetForm(onDismiss: () -> Unit) {
     var selectedTargetType by remember { mutableStateOf<TargetType?>(null) }
-//    var newTargetValue by remember { mutableIntStateOf(0) }
+    var newTargetValue by remember { mutableStateOf("") }
+    var selectedCurrency by remember { mutableStateOf("HKD") }
+    val currencies = listOf("HKD", "USD", "JPY", "CNY")
+    val currencySymbols = mapOf(
+        "HKD" to "$",
+        "USD" to "$",
+        "JPY" to "¥",
+        "CNY" to "¥"
+    )
 
-    Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier = Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = "New Target", fontWeight = FontWeight.Bold,
             fontSize = 20.sp,
@@ -236,62 +268,137 @@ fun NewTargetForm() {
             thickness = 1.dp,
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Target Type: ", modifier = Modifier.padding(end = 8.dp))
-            var expandedTargetType by remember { mutableStateOf(false) }
-            val targetTypes = listOf(TargetType.Saving, TargetType.Budget)
+        Spacer(modifier = Modifier.height(15.dp))
 
-            ExposedDropdownMenuBox(
-                expanded = expandedTargetType,
-                onExpandedChange = { expandedTargetType = it }
-            ) {
-                TextField(
-                    readOnly = true,
-                    value = selectedTargetType?.let { it::class.simpleName ?: "" } ?: "Select Type",
-                    onValueChange = {},
-                    modifier = Modifier.weight(1f),
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTargetType)
-                    }
+        // target type
+        var selectedIndex by remember { mutableIntStateOf(0) }
+        val targetTypes = listOf(TargetType.Saving, TargetType.Budget)
+
+        SingleChoiceSegmentedButtonRow {
+            targetTypes.forEachIndexed { index, target ->
+                SegmentedButton(
+                    shape = SegmentedButtonDefaults.itemShape(
+                        index = index,
+                        count = targetTypes.size
+                    ),
+                    onClick = {
+                        selectedIndex = index
+                        selectedTargetType = target
+                    },
+                    selected = index == selectedIndex,
+                    label = { Text(target.name) }
                 )
-                ExposedDropdownMenu(
-                    expanded = expandedTargetType,
-                    onDismissRequest = { expandedTargetType = false }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        // target amount and currency
+        Row(verticalAlignment = Alignment.CenterVertically) {
+
+            // currency symbol
+            val currencySymbol = currencySymbols[selectedCurrency] ?: "$"
+            Text(
+                text = currencySymbol,
+                fontSize = 22.sp, // Increased font size
+                fontWeight = FontWeight.Medium,
+                color = Color.Black
+            )
+
+            Spacer(modifier = Modifier.width(5.dp))
+
+            // target amount input
+            TextField(
+                value = newTargetValue,
+                onValueChange = {
+                    newTargetValue = when {
+                        it.isEmpty() -> "" // Keep it empty if input is empty
+                        it.all { char -> char.isDigit() } -> it // Accept only digits
+                        else -> newTargetValue // Keep the current value if input is invalid
+                    }
+                },
+                label = { Text("Target Amount") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.width(200.dp)
+            )
+
+            Spacer(modifier = Modifier.width(5.dp))
+
+            // currency options
+            var expanded by remember { mutableStateOf(false) }
+            Row(
+                modifier = Modifier
+                    .clickable { expanded = true }
+                    .padding(start = 8.dp, top = 8.dp, bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = selectedCurrency,
+                    fontSize = 20.sp, // Increased font size
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = "Select Currency",
+                    modifier = Modifier.size(28.dp), // Increased icon size
+                    tint = Color.Black
+                )
+            }
+
+            // expanded list of currencies for selection
+            Box {
+                androidx.compose.material3.DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
                 ) {
-                    targetTypes.forEach { type ->
-                        DropdownMenuItem(
-                            text = { Text(type.name) },
+                    currencies.forEach { currency ->
+                        androidx.compose.material3.DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = currency,
+                                    fontSize = 18.sp // Larger dropdown text
+                                )
+                            },
                             onClick = {
-                                selectedTargetType = type
-                                expandedTargetType = false
-                            })
+                                selectedCurrency = currency
+                                expanded = false
+                            }
+                        )
                     }
                 }
             }
         }
 
-//        Spacer(modifier = Modifier.height(10.dp))
-//        Row(verticalAlignment = Alignment.CenterVertically) {
-//            Text("Target Value: ", modifier = Modifier.padding(end = 8.dp))
-//            TextField(
-//                value = newTargetValue.toString(),
-//                onValueChange = {
-//                    val filteredValue = it.replace(Regex("[^0-9]"), "")
-//                    newTargetValue = filteredValue.toInt()
-//                },
-//                modifier = Modifier.weight(1f),
-//                keyboardOptions = KeyboardOptions.Default.copy(
-//                    keyboardType = KeyboardType.Number
-//                ),
-//                placeholder = { Text("Enter value") }
-//            )
-//        }
+        Spacer(modifier = Modifier.height(15.dp))
+
+        // save & discard button
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Button(
+                modifier = Modifier.width(100.dp),
+                onClick = { }
+            ) {
+                Text("Save")
+            }
+
+            Spacer(modifier = Modifier.width(5.dp))
+
+            Button(
+                colors = ButtonDefaults.buttonColors(containerColor = ErrorButton),
+                modifier = Modifier.width(100.dp),
+                onClick = {
+                    onDismiss()
+                }
+            ) {
+                Text("Discard")
+            }
+        }
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun TargetPreview() {
-//    NewTargetForm()
-//}
+@Preview(showBackground = true)
+@Composable
+fun TargetPreview() {
+    NewTargetForm({})
+}

@@ -34,3 +34,29 @@ async def get_batch_yahoo_stock_data(symbols: list):
             final_results[symbol] = symbol_data  
     return final_results
 
+async def get_yahoo_currency_rate(currencies: list = None):
+    # default currencies to CNY, HKD, JPY, USD if not provided
+    if currencies is None:
+        currencies = ['CNY', 'HKD', 'JPY', 'USD']
+
+    tickers = []
+    for from_currency in currencies:
+        for to_currency in currencies:
+            if from_currency != to_currency:
+                ticker = from_currency.upper() + to_currency.upper() + "=X"
+                tickers.append(ticker)
+
+    try:
+        df = yf.download(tickers, period="1d", interval="1d")
+        if df.empty:
+            raise ValueError("No data returned for the given currencies.")
+        
+        conversion_rates = {}
+        for ticker in tickers:
+            conversion_rates[ticker] = df.iloc[0, df.columns.get_loc(('Close', ticker))]
+        
+        return conversion_rates
+    
+    except Exception as e:
+        print(f"Error fetching data for currencies {currencies}: {e}")
+        return None
