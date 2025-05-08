@@ -9,7 +9,10 @@ class TransactionController():
 
 
     async def insert_transaction(self, user_id: str , payload: dict) -> dict:
-        transaction_doc = {"user_id": user_id, **payload, "datetime":  datetime.now(timezone.utc)}
+        user_payload = self.token_generator.verify_jwt_token(token)
+        user_id = str(user_payload['user_id'])
+    
+        transaction_doc = {"token": user_id, **payload, "datetime":  datetime.now(timezone.utc)}
         result = self._transaction_collection.insert_one(transaction_doc)
         return {"status": 200, "transaction_id": str(result.inserted_id)}
     
