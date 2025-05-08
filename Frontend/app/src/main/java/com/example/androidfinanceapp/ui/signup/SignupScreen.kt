@@ -105,7 +105,7 @@ fun SignupScreen(
                 ReturnLoginDialog(
                     onDismissRequest = {
                         signupViewModel.setUiStateIdle()
-                        navController.navigate(Screens.LoginScreen.route)
+                        navController.popBackStack(Screens.LoginScreen.route, false)
                     },
                     dialogText = stringResource(R.string.sign_up_success_dialog)
                 )

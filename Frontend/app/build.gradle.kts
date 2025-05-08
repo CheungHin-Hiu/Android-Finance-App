@@ -58,6 +58,7 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
     implementation("androidx.navigation:navigation-compose:2.8.9")
+    implementation("androidx.compose.runtime:runtime-tracing:1.8.0")
     implementation("co.yml:ycharts:2.1.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

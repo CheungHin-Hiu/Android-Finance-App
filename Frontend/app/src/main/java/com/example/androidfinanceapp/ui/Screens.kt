@@ -8,5 +8,4 @@ sealed class Screens(val route: String){
     object TargetScreen: Screens("target_route")
     object AssetStatisticScreen: Screens("asset_statistic_route")
     object AssetManagementScreen: Screens("asset_management_route")
-
 }
