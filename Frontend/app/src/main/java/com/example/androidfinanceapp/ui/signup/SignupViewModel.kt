@@ -13,7 +13,6 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.androidfinanceapp.TopFinanceApplication
 import com.example.androidfinanceapp.data.AuthRepository
 import kotlinx.coroutines.launch
-import kotlin.math.sign
 
 
 sealed interface SignupUiState {

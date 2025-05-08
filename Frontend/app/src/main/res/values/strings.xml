@@ -15,4 +15,14 @@
     <string name="more_options_button_description">More Options</string>
     <string name="add_asset_tab_text">Add Asset</string>
     <string name="manage_asset_tab_text">Manage Asset</string>
+    <string name="dropdown_arrow_content_description">Dropdown arrow</string>
+    <string name="asset_type_dropdown_label">Asset type</string>
+    <string name="time_dropdown_label">Time</string>
+    <string name="modify_amount_of_asset_text_field">Modify amount of asset</string>
+    <string name="manage_button">Manage</string>
+    <string name="delete_button">Delete</string>
+    <string name="modify_button">Modify</string>
+    <string name="enter_new_amount_placeholder">Enter new amount</string>
+    <string name="total_assets_title">Total Assets</string>
+    <string name="asset_statistics_title">Asset Statistics</string>
 </resources>
