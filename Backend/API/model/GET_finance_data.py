@@ -11,7 +11,7 @@ class RequestFinanceData(BaseModel):
 # Define response schema for GET /finance
 class ResponseFinanceData(BaseModel):
     timeRetrieved: time
-    currency: list[dict[str, Any]] | None = None
+    currency: dict[str, Any] | None = None
     stock: list[dict[str, Any]] | None = None
     crypto: list[dict[str, Any]] | None = None
 

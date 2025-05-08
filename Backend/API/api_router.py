@@ -9,7 +9,7 @@ from API.model.GET_target import TargetGetRequest
 from API.model.POST_target import TargetPostRequest
 
 from services.authentication.controller.auth_controller import LoginController, RegisterController
-# from services.finance.finance_data_scraper import get_batch_yahoo_stock_data
+from services.finance_service.finance_data_scraper import get_batch_yahoo_stock_data, get_yahoo_currency_rate
 from services.transaction.transaction import TransactionController
 from services.user_target.target import TargetController
 
@@ -28,11 +28,13 @@ class APIRouteDefintion:
         # route defintion
         self.router.add_api_route("/login", self._get_login_operation, methods=["POST"])
         self.router.add_api_route("/register", self._get_register_operation, methods=["POST"])
-        # self.router.add_api_route("/finance", self._get_finance_data_operation, methods=["GET"])
+        self.router.add_api_route("/finance", self._get_finance_data_operation, methods=["POST"])
         self.router.add_api_route("/transaction",  self._get_transactions_by_user, methods=["GET"])
         # self.router.add_api_route("/transaction",  self._post_transaction_data, methods=["POST"])
-        self.router.add_api_route("/target", self._get_targets_by_user, methods=["GET"])
+        
         self.router.add_api_route("/target", self._insert_target, methods=["POST"])
+        self.router.add_api_route("/target/{user_id}", self._get_targets_by_user, methods=["GET"])
+        self.router.add_api_route("/target/{user_id}", self._delete_target_by_user, methods=["DELETE"])
 
     # endpoint: _____/login, method: GET
     async def _get_login_operation(self, request_entity: LoginRequest):
@@ -46,11 +48,16 @@ class APIRouteDefintion:
         return await self.register_controller.register_credential(register_load)
 
     # endpoint: _____/finance, method: GET
-    # async def _get_finance_data_operation(self, request_entity: RequestFinanceData):
-    #     requested_items = request_entity.model_dump()
-    #     # can add currency here 
+    async def _get_finance_data_operation(self, request_entity: RequestFinanceData):
+        requested_items = request_entity.model_dump()
 
-    #     return await get_batch_yahoo_stock_data(requested_items['stock'])
+        # currency
+        currency_response = await get_yahoo_currency_rate(requested_items['currency'])
+
+        # stock
+        stock_response = await get_batch_yahoo_stock_data(requested_items['stock'])
+
+        return {"currency": currency_response, "stock": stock_response}
     
     # endpoint: _____/transaction, method: POST
     # async def _post_transaction_data(self, request_entity: TransactionPostRequest ):
@@ -70,7 +77,10 @@ class APIRouteDefintion:
         )
     
     # endpoint: _____/target, method: GET
-    async def _get_targets_by_user(self, request_entity: TargetGetRequest ):
-        target_item = request_entity.model_dump()
-        return await self.target_controller.get_targets_by_user(target_item['user_id'])
+    async def _get_targets_by_user(self, user_id: str):
+        # target_item = request_entity.model_dump()
+        return await self.target_controller.get_targets_by_user(user_id)
 
+    # endpoint: _____/target, method: DELETE
+    async def _delete_target_by_user(self, user_id: str):
+        return await self.target_controller.delete_target_by_user(user_id)
