@@ -28,10 +28,10 @@ class OverviewViewModel(private val transactionRepository: TransactionRepository
         private set
 
 
-    fun getTransactions(token: String, startDate: String , endDate: String){
+    fun getTransactions(token: String){
         viewModelScope.launch {
             try {
-                val response = transactionRepository.getTransactions(token,startDate,endDate)
+                val response = transactionRepository.getTransactions(token)
                 if(response.isSuccessful){
                     response.body()?.let {
                         getTransactionState = GetTransactionState.Success(it)
