@@ -200,9 +200,32 @@ fun OverviewScreen(
                                         fontSize = 16.sp
                                     )
                                 }
+
                             } else {
+                                val now = LocalDate.now()
+                                val month = when (selectedMonth) {
+                                    0 -> now.minusMonths(2) // Two months ago
+                                    1 -> now.minusMonths(1) // Last month
+                                    else -> now             // Current month
+                                }
+                                val startDate = month.withDayOfMonth(1)
+                                val endDate = month.withDayOfMonth(month.lengthOfMonth())
+
+                                // Filter transactions that fall within the selected month
+                                val filteredTransactions = transactionData.filter { transaction ->
+                                    try {
+                                        // Parse the transaction date (assuming ISO format: YYYY-MM-DD)
+                                        val transactionDate = LocalDate.parse(transaction.date)
+                                        // Check if it falls within the selected month range
+                                        (transactionDate.isEqual(startDate) || transactionDate.isAfter(startDate)) &&
+                                                (transactionDate.isEqual(endDate) || transactionDate.isBefore(endDate))
+                                    } catch (e: Exception) {
+                                        // If date parsing fails, exclude the transaction
+                                        false
+                                    }
+                                }
                                 // Display transaction charts
-                                TransactionCharts(transactions = transactionData)
+                                TransactionCharts(transactions = filteredTransactions)
                             }
                         }
 
