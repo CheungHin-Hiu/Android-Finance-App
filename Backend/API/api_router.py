@@ -67,7 +67,8 @@ class APIRouteDefintion:
     # endpoint: _____/transaction, method: GET
     async def _get_transactions_by_user(self, request_entity: TransactionsGetRequest ):
         transaction_item = request_entity.model_dump()
-        return await self.transaction_controller.get_transactions_by_user(transaction_item['user_id'])
+        return await self.transaction_controller.get_transactions_by_user(transaction_item['token'])
+       
     
     # endpoint: _____/target, method: POST
     async def _insert_target(self, request_entity: TargetPostRequest ):
