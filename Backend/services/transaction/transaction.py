@@ -8,7 +8,7 @@ class TransactionController():
         self.token_generator = JWTGenerator()
 
 
-    async def insert_transaction(self, user_id: str , payload: dict) -> dict:
+    async def insert_transaction(self, token: str , payload: dict) -> dict:
         user_payload = self.token_generator.verify_jwt_token(token)
         user_id = str(user_payload['user_id'])
     
