@@ -13,8 +13,6 @@ interface TransactionApiService {
     @GET("/transactions")
     suspend fun getTransactions(
         @Query("token") token: String,
-        @Query("startDate") startDate: String,
-        @Query("endDate") endDate: String
     ): Response<TransactionsResponse>
 
     //add transactions to db

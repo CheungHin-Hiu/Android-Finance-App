@@ -59,25 +59,16 @@ import com.example.androidfinanceapp.R
 
 
 val assetList = mutableListOf(
-    Asset("Stock: AAPL", amount = "100 Stock", value = "100 USD",
-        createdAt = "Created at 01/01/2025 10:32 a.m.", updatedAt = "Updated at 01/01/2025 10:32 a.m."),
-    Asset("Cash: USD", amount = "100 USD", value = "100 USD",
-        createdAt = "Created at 01/01/2025 10:32 a.m.", updatedAt = "Updated at 01/01/2025 10:32 a.m."),
-    Asset("Cash: USD", amount = "100 USD", value = "100 USD",
-        createdAt = "Created at 01/01/2025 10:32 a.m.", updatedAt = "Updated at 01/01/2025 10:32 a.m."),
-    Asset("Cash: USD", amount = "100 USD", value = "100 USD",
-        createdAt = "Created at 01/01/2025 10:32 a.m.", updatedAt = "Updated at 01/01/2025 10:32 a.m."),
-    Asset("Cash: USD", amount = "100 USD", value = "100 USD",
-        createdAt = "Created at 01/01/2025 10:32 a.m.", updatedAt = "Updated at 01/01/2025 10:32 a.m."),
-    Asset("Cash: USD", amount = "100 USD", value = "100 USD",
-        createdAt = "Created at 01/01/2025 10:32 a.m.", updatedAt = "Updated at 01/01/2025 10:32 a.m."),
-    Asset("Cash: USD", amount = "100 USD", value = "100 USD",
-        createdAt = "Created at 01/01/2025 10:32 a.m.", updatedAt = "Updated at 01/01/2025 10:32 a.m."),
-    Asset("Cash: USD", amount = "100 USD", value = "100 USD",
-        createdAt = "Created at 01/01/2025 10:32 a.m.", updatedAt = "Updated at 01/01/2025 10:32 a.m."),
-    Asset("Cash: USD", amount = "100 USD", value = "100 USD",
-        createdAt = "Created at 01/01/2025 10:32 a.m.", updatedAt = "Updated at 01/01/2025 10:32 a.m."),
-
+    Asset(
+        id = 1,
+        description = "Stock: AAPL",
+        category = "Stock",
+        type = "AAPL",
+        amount = 100.00f,
+        value = 100.00f,
+        createdAt = "haha",
+        updatedAt = "haha"
+    )
 )
 
 val assetTypeList = listOf(
@@ -143,8 +134,8 @@ fun ManageAssetTab(
         items(assetList) { asset ->
             AssetManagementCard(
                 asset.description,
-                asset.amount,
-                asset.value,
+                asset.amount.toString(),
+                asset.value.toString(),
                 asset.createdAt,
                 asset.updatedAt,
             )

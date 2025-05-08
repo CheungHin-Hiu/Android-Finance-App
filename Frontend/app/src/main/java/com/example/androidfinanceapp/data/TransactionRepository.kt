@@ -6,9 +6,7 @@ import retrofit2.Response
 
 interface TransactionRepository {
     suspend fun getTransactions(
-        token: String,
-        startDate: String,
-        endDate: String
+        token: String
     ): Response<TransactionsResponse>
 
     suspend fun addTransaction(
@@ -29,13 +27,9 @@ class NetworkTransactionRepository(
 
     override suspend fun getTransactions(
         token: String,
-        startDate: String,
-        endDate: String
     ): Response<TransactionsResponse> =
         transactionApiService.getTransactions(
             token = token,
-            startDate = startDate,
-            endDate = endDate
         )
 
     override suspend fun addTransaction(
