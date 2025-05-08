@@ -9,32 +9,32 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface AssetAPiService {
-    @GET("/asset")
+    @GET("/asset/{token}")
     suspend fun getAsset(
-        @Header("Authorization") token: String,
-        @Query("year") year: String,
-        @Query("currency") currency: String,
+        @Path("token", encoded = true) token: String,
+        @Query(value = "currency") currency: String
     ): Response<List<GetAssetsResponse>>
 
-    @POST("/asset")
+    @POST("/asset/{token}")
     suspend fun addAsset(
-        @Header("Authorization") token: String,
+        @Path("token", encoded = true) token: String,
         @Body request: CreateAssetRequest
     ): Response<Unit>
 
-    @PUT("/asset")
+    @PUT("/asset/{token}")
     suspend fun modifyAsset(
-        @Header("Authorization") token: String,
+        @Path("token", encoded = true) token: String,
         @Body request: ModifyAssetRequest
     ): Response<Unit>
 
-    @DELETE("/asset")
+    @DELETE("/asset/{token}")
     suspend fun deleteAsset(
-        @Header("Authorization") token: String,
-        @Body request: DeleteAssetRequest
+        @Path("token", encoded = true) token: String,
+        @Query(value = "id") id: Int
     ): Response<Unit>
 }
 
@@ -44,7 +44,7 @@ data class GetAssetResponse(
     @SerialName("category") val category: String,
     @SerialName("type") val type: String,
     @SerialName("amount") val amount: Float,
-    @SerialName("value") val value: Float,
+    @SerialName("converted_amount") val value: Float,
     @SerialName("created_at") val createdAt: String,
     @SerialName("updated_at") val updatedAt: String,
 )
@@ -65,9 +65,4 @@ data class CreateAssetRequest(
 data class ModifyAssetRequest(
     @SerialName("id") val assetId: Int,
     @SerialName("amount") val amount: Float,
-)
-
-@Serializable
-data class DeleteAssetRequest(
-    @SerialName("id") val assetId: Int,
 )
