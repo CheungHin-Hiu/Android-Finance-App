@@ -40,8 +40,8 @@ class NetworkTransactionRepository(
         date: String,
     ): Response<Unit> =
         transactionApiService.addTransaction(
+            token=token,
             request = AddTransactionRequest(
-                token = token,
                 type = type,
                 categoryType = categoryType,
                 currencyType = currencyType,
