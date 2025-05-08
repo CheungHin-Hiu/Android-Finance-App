@@ -344,7 +344,6 @@ fun OverviewScreen(
                                             currencyType = transaction.currencyType,
                                             amount = transaction.amount,
                                             date = transaction.date,
-                                            createdAt = transaction.createdAt
                                         )
                                     }
                                 }
@@ -492,7 +491,6 @@ fun TransactionItem(
     currencyType: String,
     amount: Double,
     date: String,
-    createdAt: String
 ) {
     Column(
         modifier = Modifier
@@ -576,20 +574,20 @@ fun TransactionItem(
 fun TransactionCharts(transactions: List<Transaction>) {
     // Calculate summary data
     val totalIncome = transactions.filter { it.type.contains("Income", ignoreCase = true) }
-        .sumOf { it.localAmount }
+        .sumOf { it.convertedAmount }
     val totalExpense = transactions.filter { it.type.contains("Expense", ignoreCase = true) }
-        .sumOf { it.localAmount }
+        .sumOf { it.convertedAmount }
 
     // Group transactions by category
     val expenseByCategory = transactions
         .filter { it.type.contains("Expense", ignoreCase = true) }
         .groupBy { it.categoryType }
-        .mapValues { it.value.sumOf { transaction -> transaction.localAmount } }
+        .mapValues { it.value.sumOf { transaction -> transaction.convertedAmount } }
 
     val incomeByCategory = transactions
         .filter { it.type.contains("Income", ignoreCase = true) }
         .groupBy { it.categoryType }
-        .mapValues { it.value.sumOf { transaction -> transaction.localAmount } }
+        .mapValues { it.value.sumOf { transaction -> transaction.convertedAmount } }
 
     // Create chart data
     val expenseChartData = expenseByCategory.map { (category, amount) ->

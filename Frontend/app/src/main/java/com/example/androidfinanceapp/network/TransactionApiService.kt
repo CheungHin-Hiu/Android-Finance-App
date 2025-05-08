@@ -36,9 +36,8 @@ data class Transaction(
     @SerialName("category_type") val categoryType: String,
     @SerialName("currency_type") val currencyType: String,
     @SerialName("amount") val amount: Double,
-    @SerialName("local_amount") val localAmount: Double,
+    @SerialName("converted_amount") val convertedAmount: Double,
     @SerialName("date") val date: String,
-    @SerialName("created_at") val createdAt: String
 )
 
 
@@ -51,5 +50,4 @@ data class AddTransactionRequest(
     @SerialName("currency_type") val currencyType: String,
     @SerialName("amount") val amount: Double,
     @SerialName("date") val date: String,
-    @SerialName("created_at") val createdAt: String
 )

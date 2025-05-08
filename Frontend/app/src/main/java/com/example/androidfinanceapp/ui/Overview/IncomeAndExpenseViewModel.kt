@@ -30,20 +30,20 @@ class IncomeAndExpenseViewModel(private val transactionRepository: TransactionRe
         currencyType: String,
         amount: Double,
         date: String,
-        createdAt: String){
+    ){
         viewModelScope.launch {
             try {
-                val response = transactionRepository.addTransaction(token,type,categoryType,currencyType,amount,date,createdAt)
+                val response = transactionRepository.addTransaction(token,type,categoryType,currencyType,amount,date)
                 if(response.isSuccessful){
                     response.body()?.let {
                         addTransactionState = AddTransactionState.Success
                     }
                 }else{
-                    addTransactionState = AddTransactionState.Error("Login failed: ${response.message()}" )
+                    addTransactionState = AddTransactionState.Error("Add transaction failed: ${response.message()}" )
                 }
             }catch (e: Exception){
                 addTransactionState = AddTransactionState.Error("An error occurred: ${e.message}" )
-                Log.e("Login error", "" + e.message)
+                Log.e("Add transaction error", "" + e.message)
             }
         }
     }
