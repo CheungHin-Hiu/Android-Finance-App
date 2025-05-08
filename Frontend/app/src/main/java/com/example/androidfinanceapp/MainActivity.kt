@@ -56,7 +56,8 @@ fun TopFinanceApp() {
                 SignupScreen(navController)
             }
             composable(Screens.OverviewScreen.route){
-                OverviewScreen(navController, dataStoreManager)
+                OverviewScreen(navController = navController,
+                    dataStoreManager = dataStoreManager,)
             }
             composable(Screens.IncomeAndExpenseScreen.route){
                 IncomeAndExpenseScreen(

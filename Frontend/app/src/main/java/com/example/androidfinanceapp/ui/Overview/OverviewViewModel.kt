@@ -37,11 +37,11 @@ class OverviewViewModel(private val transactionRepository: TransactionRepository
                         getTransactionState = GetTransactionState.Success(it)
                     }
                 }else{
-                    getTransactionState = GetTransactionState.Error("Login failed: ${response.message()}" )
+                    getTransactionState = GetTransactionState.Error("Load transaction failed: ${response.message()}" )
                 }
             }catch (e: Exception){
                 getTransactionState = GetTransactionState.Error("An error occurred: ${e.message}" )
-                Log.e("Login error", "" + e.message)
+                Log.e("Transaction error", "" + e.message)
             }
         }
     }
