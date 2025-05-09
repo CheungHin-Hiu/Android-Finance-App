@@ -102,7 +102,7 @@ fun SignupScreen(
             }
             is SignupUiState.Success -> {
                 // Display showing Signup success, when button pressed, navigate to login screen
-                ReturnLoginDialog(
+                SuccessDialog(
                     onDismissRequest = {
                         signupViewModel.setUiStateIdle()
                         navController.popBackStack(Screens.LoginScreen.route, false)
@@ -130,7 +130,7 @@ fun SignupScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReturnLoginDialog(
+fun SuccessDialog(
     onDismissRequest: () -> Unit,
     dialogText: String,
 ) {

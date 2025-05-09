@@ -2,7 +2,6 @@ package com.example.androidfinanceapp.data
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -20,11 +19,11 @@ class DataStoreManager(private val context: Context) {
     }
 
     val userIdFlow: Flow<String?> = context.dataStore.data.map { preferences ->
-        preferences[USER_ID]
+        preferences[USER_ID] ?: ""
     }
 
-    val tokenFlow: Flow<String?> = context.dataStore.data.map { preferences ->
-        preferences[TOKEN_KEY]
+    val tokenFlow: Flow<String> = context.dataStore.data.map { preferences ->
+        preferences[TOKEN_KEY] ?: ""
     }
 
     val usernameFlow: Flow<String?> = context.dataStore.data.map { preferences ->

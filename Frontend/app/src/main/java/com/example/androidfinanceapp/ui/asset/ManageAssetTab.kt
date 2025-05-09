@@ -50,26 +50,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.androidfinanceapp.R
-
-
-val assetList = mutableListOf(
-    Asset(
-        id = 1,
-        description = "Stock: AAPL",
-        category = "Stock",
-        type = "AAPL",
-        amount = 100.00f,
-        value = 100.00f,
-        createdAt = "haha",
-        updatedAt = "haha"
-    )
-)
+import com.example.androidfinanceapp.ui.login.ErrorDialog
+import com.example.androidfinanceapp.ui.signup.SuccessDialog
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 val assetTypeList = listOf(
     "All",
@@ -89,15 +76,18 @@ val dateRangeTypeList = listOf(
     "All",
 )
 
-
 @Composable
 fun ManageAssetTab(
-    token: String?,
-    navController: NavController,
-    modifier: Modifier,
+    token: String,
+    assetViewModel: AssetViewModel,
 ) {
     var assetType by remember { mutableStateOf("All") }
     var dateRange by remember { mutableStateOf("This week") }
+
+    val modifyAssetState = assetViewModel.assetState
+    val filteredAssetList = filterAssetList(assetViewModel.assetList, assetType, dateRange)
+
+    var openAlertDialog by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
@@ -124,6 +114,7 @@ fun ManageAssetTab(
             }
         )
     }
+
     HorizontalDivider(
         thickness = 3.dp,
         modifier = Modifier
@@ -131,17 +122,106 @@ fun ManageAssetTab(
     )
 
     LazyColumn {
-        items(assetList) { asset ->
+        items(filteredAssetList) { asset ->
             AssetManagementCard(
-                asset.description,
-                asset.amount.toString(),
-                asset.value.toString(),
-                asset.createdAt,
-                asset.updatedAt,
+                description = asset.description,
+                amount = asset.amount.toString(),
+                value = asset.value.toString(),
+                createdAt = "Created at:" + asset.createdAt,
+                updatedAt = "Updated at:"+ asset.updatedAt,
+                onModifyClick = { newAmount ->
+                    assetViewModel.modifyAsset(
+                        token =  token,
+                        id = asset.id,
+                        amount = newAmount.toFloat()
+                    )
+                },
+                onDeleteClick = {
+                    assetViewModel.deleteAsset(
+                        token = token,
+                        id = asset.id
+                    )
+                }
             )
         }
     }
+
+    when(modifyAssetState) {
+        is AssetState.Idle -> {
+            // Do nothing
+        }
+        is AssetState.SuccessModifying -> {
+            SuccessDialog(
+                onDismissRequest = {
+                    assetViewModel.setStateIdle()
+                    assetViewModel.getAsset(token, currency = "USD")
+                },
+                dialogText = stringResource(R.string.success_modifying_asset_value)
+            )
+        }
+        is AssetState.SuccessDeleting -> {
+            SuccessDialog(
+                onDismissRequest = {
+                    assetViewModel.setStateIdle()
+                    assetViewModel.getAsset(token, currency = "USD")
+                },
+                dialogText = stringResource(R.string.successfully_delete_asset)
+            )
+        }
+        is AssetState.Error -> {
+            val errorMessage = modifyAssetState.message
+            openAlertDialog = true
+            if (openAlertDialog) {
+                ErrorDialog(
+                    onDismissRequest = {
+                        openAlertDialog = false
+                        assetViewModel.setStateIdle()
+                    },
+                    dialogText = errorMessage
+                )
+            }
+        }
+        else -> {
+            // Do nothing
+        }
+    }
 }
+
+private fun filterAssetList(
+    assetList: MutableList<Asset>,
+    assetType: String,
+    dateRange: String,
+): List<Asset> {
+    // Define a date formatter that matches the format of the createdAt string.
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+
+    // Get the current date
+    val currentDate = LocalDate.now()
+
+    // Determine the start date based on the selected date range
+    val startDate = when (dateRange) {
+        "This week" -> currentDate.with(java.time.DayOfWeek.MONDAY)
+        "This month" -> currentDate.withDayOfMonth(1)
+        "Last 6 month" -> currentDate.minusMonths(6).withDayOfMonth(1)
+        "Last 12 month" -> currentDate.minusYears(1).withDayOfMonth(1)
+        else -> null // "All" or any other case
+    }
+
+    return assetList.filter { asset ->
+        // Filter by asset type
+        val matchesType = assetType == "All" || asset.type == assetType
+
+        // Parse the createdAt date
+        val assetDate = LocalDate.parse(asset.createdAt, formatter)
+
+        // Filter by date range
+        val matchesDateRange = startDate == null || !assetDate.isBefore(startDate)
+
+        // Return true if both filters match
+        matchesType && matchesDateRange
+    }
+}
+
 
 @Composable
 fun AssetDropDownList(
@@ -223,6 +303,8 @@ fun AssetManagementCard(
     value: String,
     createdAt: String,
     updatedAt: String,
+    onModifyClick: (String) -> Unit,
+    onDeleteClick: () -> Unit,
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
@@ -302,9 +384,11 @@ fun AssetManagementCard(
             description = description,
             currentAmount = amount,
             onDelete = {
+                onDeleteClick()
                 showDialog = false
             },
-            onModifyConfirm = {
+            onModifyConfirm = { newAmount ->
+                onModifyClick(newAmount)
                 showDialog = false
             },
             onDismissRequest = {
@@ -412,23 +496,5 @@ fun ManageAssetPopUp(
                 }
             }
         }
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewManageAssetTab() {
-    // Mock NavController for preview purposes
-    val navController = rememberNavController()
-
-    // Mock token value
-    val token = "mockToken"
-
-    ManageAssetTab(
-        token = token,
-        navController = navController,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
     )
 }

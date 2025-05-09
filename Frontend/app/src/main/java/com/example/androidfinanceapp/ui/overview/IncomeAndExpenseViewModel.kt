@@ -1,4 +1,4 @@
-package com.example.androidfinanceapp.ui.Overview
+package com.example.androidfinanceapp.ui.overview
 
 import android.util.Log
 import androidx.compose.runtime.getValue

@@ -1,6 +1,5 @@
-package com.example.androidfinanceapp.ui.Overview
+package com.example.androidfinanceapp.ui.overview
 
-import android.app.DatePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,10 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -32,24 +29,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.androidfinanceapp.data.DataStoreManager
 import com.example.androidfinanceapp.R
+import com.example.androidfinanceapp.data.DataStoreManager
 import com.example.androidfinanceapp.ui.common.CategoryGrid
 import com.example.androidfinanceapp.ui.common.CategoryItem
 import com.example.androidfinanceapp.ui.common.DatePickerRow
 import com.example.androidfinanceapp.ui.common.KeypadGrid
 import com.example.androidfinanceapp.ui.common.ManageScreenTopAppBar
 import com.example.androidfinanceapp.ui.common.evaluateExpression
-import java.util.Calendar
-
 
 
 @Composable
@@ -212,7 +205,6 @@ fun IncomeAndExpenseScreen(
             currencyType = selectedCurrency,
             amount = amountValue,
             date = formattedDate,
-            createdAt = createdAt
         )
 
     }
