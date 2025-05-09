@@ -6,9 +6,7 @@ import retrofit2.Response
 
 interface TransactionRepository {
     suspend fun getTransactions(
-        token: String,
-        startDate: String,
-        endDate: String
+        token: String
     ): Response<TransactionsResponse>
 
     suspend fun addTransaction(
@@ -18,7 +16,6 @@ interface TransactionRepository {
         currencyType: String,
         amount: Double,
         date: String,
-        createAt: String
     ): Response<Unit>
 }
 
@@ -29,13 +26,9 @@ class NetworkTransactionRepository(
 
     override suspend fun getTransactions(
         token: String,
-        startDate: String,
-        endDate: String
     ): Response<TransactionsResponse> =
         transactionApiService.getTransactions(
             token = token,
-            startDate = startDate,
-            endDate = endDate
         )
 
     override suspend fun addTransaction(
@@ -45,17 +38,15 @@ class NetworkTransactionRepository(
         currencyType: String,
         amount: Double,
         date: String,
-        createAt: String
     ): Response<Unit> =
         transactionApiService.addTransaction(
+            token=token,
             request = AddTransactionRequest(
-                token = token,
                 type = type,
                 categoryType = categoryType,
                 currencyType = currencyType,
                 amount = amount,
                 date = date,
-                createdAt = createAt
             )
         )
 }

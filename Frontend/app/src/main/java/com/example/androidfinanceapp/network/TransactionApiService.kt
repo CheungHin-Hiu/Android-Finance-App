@@ -6,20 +6,20 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface TransactionApiService {
     //get all transactions
-    @GET("/transactions")
+    @GET("/transactions/{token}")
     suspend fun getTransactions(
-        @Query("token") token: String,
-        @Query("startDate") startDate: String,
-        @Query("endDate") endDate: String
+        @Path("token", encoded = true) token: String,
     ): Response<TransactionsResponse>
 
     //add transactions to db
-    @POST("/transactions")
+    @POST("/transactions/{token}")
     suspend fun addTransaction(
+        @Path("token", encoded = true) token: String,
         @Body request: AddTransactionRequest
     ):Response<Unit>
 }
@@ -38,20 +38,17 @@ data class Transaction(
     @SerialName("category_type") val categoryType: String,
     @SerialName("currency_type") val currencyType: String,
     @SerialName("amount") val amount: Double,
-    @SerialName("local_amount") val localAmount: Double,
+    @SerialName("converted_amount") val convertedAmount: Double,
     @SerialName("date") val date: String,
-    @SerialName("created_at") val createdAt: String
 )
 
 
 //adding the transaction and its category
 @Serializable
 data class AddTransactionRequest(
-    @SerialName("auth") val token: String,
     @SerialName("type") val type: String,
     @SerialName("category_type") val categoryType: String,
     @SerialName("currency_type") val currencyType: String,
     @SerialName("amount") val amount: Double,
     @SerialName("date") val date: String,
-    @SerialName("created_at") val createdAt: String
 )

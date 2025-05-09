@@ -103,7 +103,7 @@ fun OverviewScreen(
         val endDate = month.withDayOfMonth(month.lengthOfMonth()).format(DateTimeFormatter.ISO_DATE)
 
         // Fetch transactions for the selected month
-        overviewViewModel.getTransactions(token.toString(), startDate, endDate)
+        overviewViewModel.getTransactions(token.toString())
     }
 
     // Create NavigationDrawer
@@ -200,9 +200,32 @@ fun OverviewScreen(
                                         fontSize = 16.sp
                                     )
                                 }
+
                             } else {
+                                val now = LocalDate.now()
+                                val month = when (selectedMonth) {
+                                    0 -> now.minusMonths(2) // Two months ago
+                                    1 -> now.minusMonths(1) // Last month
+                                    else -> now             // Current month
+                                }
+                                val startDate = month.withDayOfMonth(1)
+                                val endDate = month.withDayOfMonth(month.lengthOfMonth())
+
+                                // Filter transactions that fall within the selected month
+                                val filteredTransactions = transactionData.filter { transaction ->
+                                    try {
+                                        // Parse the transaction date (assuming ISO format: YYYY-MM-DD)
+                                        val transactionDate = LocalDate.parse(transaction.date)
+                                        // Check if it falls within the selected month range
+                                        (transactionDate.isEqual(startDate) || transactionDate.isAfter(startDate)) &&
+                                                (transactionDate.isEqual(endDate) || transactionDate.isBefore(endDate))
+                                    } catch (e: Exception) {
+                                        // If date parsing fails, exclude the transaction
+                                        false
+                                    }
+                                }
                                 // Display transaction charts
-                                TransactionCharts(transactions = transactionData)
+                                TransactionCharts(transactions = filteredTransactions)
                             }
                         }
 
@@ -246,19 +269,8 @@ fun OverviewScreen(
                                         onClick = {
                                             // Retry loading transactions
                                             overviewViewModel.setGetIdle()
-                                            val now = LocalDate.now()
-                                            val month = when (selectedMonth) {
-                                                0 -> now.minusMonths(2) // Two months ago
-                                                1 -> now.minusMonths(1) // Last month
-                                                else -> now             // Current month
-                                            }
-                                            val startDate = month.withDayOfMonth(1).format(DateTimeFormatter.ISO_DATE)
-                                            val endDate = month.withDayOfMonth(month.lengthOfMonth()).format(DateTimeFormatter.ISO_DATE)
-
                                             overviewViewModel.getTransactions(
-                                                token.toString(),
-                                                startDate,
-                                                endDate
+                                                token.toString()
                                             )
                                         },
                                         modifier = Modifier.padding(top = 16.dp),
@@ -305,35 +317,61 @@ fun OverviewScreen(
                         is GetTransactionState.Success -> {
                             val transactions = getTransactionState.transactionsResponse.transactions
 
-                            if (transactions.isEmpty()) {
-                                // Show message when no transactions found
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "No transactions found for this period",
-                                        color = Color.Gray,
-                                        fontSize = 16.sp
-                                    )
-                                }
-                            } else {
+
                                 // Display transactions in a LazyColumn
-                                LazyColumn(
-                                    modifier = Modifier.fillMaxSize()
-                                ) {
-                                    items(transactions) { transaction ->
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                // Calculate date range based on selected month
+                                val now = LocalDate.now()
+                                val month = when (selectedMonth) {
+                                    0 -> now.minusMonths(2) // Two months ago
+                                    1 -> now.minusMonths(1) // Last month
+                                    else -> now             // Current month
+                                }
+                                val startDate = month.withDayOfMonth(1)
+                                val endDate = month.withDayOfMonth(month.lengthOfMonth())
+
+                                // Filter transactions that fall within the selected month
+                                val filteredTransactions = transactions.filter { transaction ->
+                                    try {
+                                        // Parse the transaction date (assuming ISO format: YYYY-MM-DD)
+                                        val transactionDate = LocalDate.parse(transaction.date)
+                                        // Check if it falls within the selected month range
+                                        (transactionDate.isEqual(startDate) || transactionDate.isAfter(startDate)) &&
+                                                (transactionDate.isEqual(endDate) || transactionDate.isBefore(endDate))
+                                    } catch (e: Exception) {
+                                        // If date parsing fails, exclude the transaction
+                                        false
+                                    }
+                                }
+
+                                if (filteredTransactions.isEmpty()) {
+                                    item {
+                                        Box(
+                                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = "No transactions for this period",
+                                                color = Color.Gray,
+                                                fontSize = 16.sp
+                                            )
+                                        }
+                                    }
+                                } else {
+                                    items(filteredTransactions) { transaction ->
                                         TransactionItem(
                                             type = transaction.type,
                                             categoryType = transaction.categoryType,
                                             currencyType = transaction.currencyType,
                                             amount = transaction.amount,
                                             date = transaction.date,
-                                            createdAt = transaction.createdAt
                                         )
                                     }
                                 }
                             }
+
                         }
 
                         // When error, show the error message
@@ -376,22 +414,8 @@ fun OverviewScreen(
                                         onClick = {
                                             // Retry loading transactions
                                             overviewViewModel.setGetIdle()
-                                            val now = LocalDate.now()
-                                            val month = when (selectedMonth) {
-                                                0 -> now.minusMonths(2) // Two months ago
-                                                1 -> now.minusMonths(1) // Last month
-                                                else -> now             // Current month
-                                            }
-                                            val startDate = month.withDayOfMonth(1)
-                                                .format(DateTimeFormatter.ISO_DATE)
-                                            val endDate =
-                                                month.withDayOfMonth(month.lengthOfMonth())
-                                                    .format(DateTimeFormatter.ISO_DATE)
-
                                             overviewViewModel.getTransactions(
                                                 token.toString(),
-                                                startDate,
-                                                endDate
                                             )
                                         },
                                         modifier = Modifier.padding(top = 16.dp),
@@ -490,7 +514,6 @@ fun TransactionItem(
     currencyType: String,
     amount: Double,
     date: String,
-    createdAt: String
 ) {
     Column(
         modifier = Modifier
@@ -574,20 +597,20 @@ fun TransactionItem(
 fun TransactionCharts(transactions: List<Transaction>) {
     // Calculate summary data
     val totalIncome = transactions.filter { it.type.contains("Income", ignoreCase = true) }
-        .sumOf { it.localAmount }
+        .sumOf { it.convertedAmount }
     val totalExpense = transactions.filter { it.type.contains("Expense", ignoreCase = true) }
-        .sumOf { it.localAmount }
+        .sumOf { it.convertedAmount }
 
     // Group transactions by category
     val expenseByCategory = transactions
         .filter { it.type.contains("Expense", ignoreCase = true) }
         .groupBy { it.categoryType }
-        .mapValues { it.value.sumOf { transaction -> transaction.localAmount } }
+        .mapValues { it.value.sumOf { transaction -> transaction.convertedAmount } }
 
     val incomeByCategory = transactions
         .filter { it.type.contains("Income", ignoreCase = true) }
         .groupBy { it.categoryType }
-        .mapValues { it.value.sumOf { transaction -> transaction.localAmount } }
+        .mapValues { it.value.sumOf { transaction -> transaction.convertedAmount } }
 
     // Create chart data
     val expenseChartData = expenseByCategory.map { (category, amount) ->
