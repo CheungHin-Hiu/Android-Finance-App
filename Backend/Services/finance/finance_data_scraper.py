@@ -47,12 +47,12 @@ async def _get_yahoo_currency_rate(currencies: list = None):
     if currencies is None:
         currencies = ["CNY", "HKD", "JPY", "USD"]
 
-    tickers = []
-    for from_currency in currencies:
-        for to_currency in currencies:
-            if from_currency != to_currency:
-                ticker = from_currency.upper() + to_currency.upper() + "=X"
-                tickers.append(ticker)
+    tickers = [
+        f"{from_currency.upper()}{to_currency.upper()}=X"
+        for from_currency in currencies
+        for to_currency in currencies
+        if from_currency != to_currency
+    ]
 
     try:
         df = yf.download(tickers, period="1d", interval="1d")
@@ -84,17 +84,33 @@ async def get_finance_data(
         cryptos = [crypto + "-USD" for crypto in cryptos]
 
     cache_folder = "finance_data_cache"
-    cache_dir = os.path.join(cache_folder, 'data.json')
+    cache_dir = os.path.join(cache_folder, "data.json")
     # create cache folder if it doesn't exist
     os.makedirs(cache_folder, exist_ok=True)
 
     # return cached data if not expired
     if os.path.exists(cache_dir):
-        with open(cache_dir, 'r') as f:
+        with open(cache_dir, "r") as f:
             cached_data = json.load(f)
             cached_time = datetime.fromisoformat(cached_data["timeRetrieved"])
             if cached_time.date() == datetime.now(timezone.utc).date():
-                return cached_data
+                currency_tickers = [
+                    f"{from_currency.upper()}{to_currency.upper()}=X"
+                    for from_currency in currencies
+                    for to_currency in currencies
+                    if from_currency != to_currency
+                ]
+
+                # check if cache contains all requested data
+                if (
+                    all(
+                        currency in cached_data["currency"]
+                        for currency in currency_tickers
+                    )
+                    and all(stock in cached_data["stock"] for stock in stocks)
+                    and all(crypto in cached_data["crypto"] for crypto in cryptos)
+                ):
+                    return cached_data
 
     # fetch new data from yfinace
     print("fetch data from yfinance")
@@ -110,7 +126,7 @@ async def get_finance_data(
     }
 
     # save data to cache
-    with open(cache_dir, 'w') as f:
+    with open(cache_dir, "w") as f:
         json.dump(result, f)
 
     return result
