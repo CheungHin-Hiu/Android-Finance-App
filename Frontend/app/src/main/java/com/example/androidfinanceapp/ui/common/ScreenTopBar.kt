@@ -30,7 +30,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import com.example.androidfinanceapp.R
 import com.example.androidfinanceapp.ui.Screens
 import kotlinx.coroutines.CoroutineScope
@@ -43,9 +42,9 @@ fun ScreenTopBar(
     currentScreen: Screens
 ){
     val screenTitle = when(currentScreen) {
-        is Screens.OverviewScreen -> "Overview";
-        is Screens.TargetScreen -> "Target";
-        is Screens.AssetStatisticScreen -> "Asset";
+        is Screens.OverviewScreen -> "Overview"
+        is Screens.TargetScreen -> "Target"
+        is Screens.AssetStatisticScreen -> "Asset"
         else -> "Title"
     }
 

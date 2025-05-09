@@ -6,7 +6,6 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
-import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -17,7 +16,7 @@ interface AssetAPiService {
     suspend fun getAsset(
         @Path("token", encoded = true) token: String,
         @Query(value = "currency") currency: String
-    ): Response<List<GetAssetsResponse>>
+    ): Response<GetAssetsResponse>
 
     @POST("/asset/{token}")
     suspend fun addAsset(

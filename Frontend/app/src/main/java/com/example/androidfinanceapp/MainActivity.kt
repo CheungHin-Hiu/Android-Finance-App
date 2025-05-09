@@ -10,18 +10,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.androidfinanceapp.data.DataStoreManager
-import com.example.androidfinanceapp.ui.Overview.IncomeAndExpenseScreen
-import com.example.androidfinanceapp.ui.Overview.IncomeAndExpenseViewModel
-import com.example.androidfinanceapp.ui.Overview.OverviewScreen
 import com.example.androidfinanceapp.ui.Screens
 import com.example.androidfinanceapp.ui.asset.AssetManagementScreen
 import com.example.androidfinanceapp.ui.asset.AssetStatisticsScreen
 import com.example.androidfinanceapp.ui.login.LoginScreen
+import com.example.androidfinanceapp.ui.overview.IncomeAndExpenseScreen
+import com.example.androidfinanceapp.ui.overview.OverviewScreen
 import com.example.androidfinanceapp.ui.signup.SignupScreen
 import com.example.androidfinanceapp.ui.target.TargetScreen
 import com.example.androidfinanceapp.ui.theme.AndroidFinanceAppTheme
@@ -46,7 +44,7 @@ fun TopFinanceApp() {
     Scaffold { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = Screens.LoginScreen.route,
+            startDestination = Screens.AssetStatisticScreen.route,
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
             composable(Screens.LoginScreen.route) {
