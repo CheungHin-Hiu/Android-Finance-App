@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 class TargetPostRequest(BaseModel):
-    user_id: str
+    token: str
     target_type: str
     amount: float
     currency: str

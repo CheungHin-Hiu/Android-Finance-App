@@ -56,7 +56,11 @@ class TargetController:
 
         return {"status": 200, "targets": targets}
 
-    async def delete_target_by_user(self, user_id: str) -> dict:
+    async def delete_target_by_user(self, token: str) -> dict:
+        # convert token to user_id
+        user_payload = self.token_generator.verify_jwt_token(token)
+        user_id = str(user_payload["user_id"])
+
         result = self._target_collection.delete_many({"user_id": user_id})
 
         if result.deleted_count == 0:
