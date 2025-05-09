@@ -7,7 +7,7 @@ import com.example.androidfinanceapp.network.ModifyAssetRequest
 import retrofit2.Response
 
 interface AssetRepository {
-    suspend fun getAsset(token: String, year: String, currency: String): Response<List<GetAssetsResponse>>
+    suspend fun getAsset(token: String, currency: String): Response<GetAssetsResponse>
 
     suspend fun addAsset(token: String, category: String, type: String, amount: Float): Response<Unit>
 
@@ -21,9 +21,8 @@ class NetworkAssetRepository(
 ): AssetRepository {
     override suspend fun getAsset(
         token: String,
-        year: String,
         currency: String
-    ) = assetAPiService.getAsset(token = token, currency = currency)
+    ): Response<GetAssetsResponse> = assetAPiService.getAsset(token = token, currency = currency)
 
     override suspend fun addAsset(
         token: String,

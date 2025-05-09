@@ -1,7 +1,6 @@
-package com.example.androidfinanceapp.ui.Overview
+package com.example.androidfinanceapp.ui.overview
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image

@@ -1,13 +1,17 @@
 package com.example.androidfinanceapp.data
 
+import android.content.Context
+import com.example.androidfinanceapp.data.database.AssetTotalDatabase
+import com.example.androidfinanceapp.data.database.AssetTotalRepository
+import com.example.androidfinanceapp.data.database.OfflineAssetTotalRepository
 import com.example.androidfinanceapp.network.AssetAPiService
 import com.example.androidfinanceapp.network.AuthApiService
 import com.example.androidfinanceapp.network.TargetApiService
 import com.example.androidfinanceapp.network.TransactionApiService
-import retrofit2.Retrofit
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
+import retrofit2.Retrofit
 
 // Dependency Injection container at the application level
 interface AppContainer {
@@ -15,10 +19,11 @@ interface AppContainer {
     val transactionRepository: TransactionRepository
     val assetRepository: AssetRepository
     val targetRepository: TargetRepository
+    val assetTotalRepository: AssetTotalRepository
 }
 
 // Implementation of the dependency injection container
-class DefaultAppContainer: AppContainer {
+class DefaultAppContainer(private val context: Context): AppContainer {
     private val baseUrl = "http://10.0.2.2:8000/"
 
     private val json = Json { ignoreUnknownKeys = true}
@@ -57,5 +62,9 @@ class DefaultAppContainer: AppContainer {
 
     override val targetRepository: TargetRepository by lazy {
         NetworkTargetRepository(targetService)
+    }
+
+    override val assetTotalRepository: AssetTotalRepository by lazy {
+        OfflineAssetTotalRepository(AssetTotalDatabase.getDatabase(context = context).assetTotalDao())
     }
 }

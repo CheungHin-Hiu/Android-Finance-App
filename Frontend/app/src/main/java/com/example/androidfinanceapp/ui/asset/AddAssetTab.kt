@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,15 +28,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.example.androidfinanceapp.R
 import com.example.androidfinanceapp.ui.common.CategoryGrid
 import com.example.androidfinanceapp.ui.common.CategoryItem
-import com.example.androidfinanceapp.ui.common.DatePickerRow
 import com.example.androidfinanceapp.ui.common.KeypadGrid
+import com.example.androidfinanceapp.ui.login.ErrorDialog
+import com.example.androidfinanceapp.ui.signup.SuccessDialog
 
 val currencies = listOf("HKD", "USD", "JPY", "CNY")
 
@@ -54,12 +54,15 @@ val cryptoCode = listOf("BTC", "ETH", "USDT")
 
 @Composable
 fun AddAssetTab(
-    token: String?,
-    navController: NavController,
+    token: String,
+    assetViewModel: AssetViewModel,
     modifier: Modifier,
 ) {
+    // State for the whole screen
+    val addAssetState = assetViewModel.assetState
+
     // State for tracking the selected asset category
-    var selectedCategory by remember { mutableStateOf<CategoryItem?>(null) }
+    var selectedCategory by remember { mutableStateOf(CategoryItem(1, R.drawable.salary, "Cash")) }
 
     var amountValue by remember { mutableStateOf("") }
 
@@ -92,8 +95,8 @@ fun AddAssetTab(
     // Track whether the dropdown list should be expanded or not
     var expanded by remember { mutableStateOf(false) }
 
+    var openAlertDialog by remember { mutableStateOf(false) }
 
-    var selectedDate by remember { mutableStateOf("2025/12/31(Wed)") }
 
     CategoryGrid(
         categories = assetCategories,
@@ -107,104 +110,91 @@ fun AddAssetTab(
         modifier = modifier.padding(start = 10.dp)
     )
 
-    HorizontalDivider(
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp, bottom = 3.dp),
-        thickness = 2.dp,
-        color = Color.Black
-    )
-
-    when(selectedCategory) {
-        assetCategories[2] -> AmountAndAssetSection(
-            assetSymbol = "Share:",
-            assetAmount = stockShare,
-            assetCode = selectedStock,
-            assetList = stockCode,
-            expanded = expanded,
-            onAssetCodeClick = {
-                expanded = true
-            },
-            onDismissDropDownClick = {
-                expanded = false
-            },
-            onDropDownItemClick = { newStock ->
-                selectedStock = newStock
-                expanded = false
-            }
-        )
-        assetCategories[1] -> AmountAndAssetSection(
-            assetSymbol = "Coin:",
-            assetAmount = cryptoAmount,
-            assetCode = selectedCrypto,
-            assetList = cryptoCode,
-            expanded = expanded,
-            onAssetCodeClick = {
-                expanded = true
-            },
-            onDismissDropDownClick = {
-                expanded = false
-            },
-            onDropDownItemClick = { newCrypto ->
-                selectedCrypto = newCrypto
-                expanded = false
-            }
-        )
-        else -> AmountAndAssetSection(
-            assetSymbol = currencySymbol,
-            assetAmount = currencyAmount,
-            assetCode = selectedCurrency,
-            assetList = currencies,
-            expanded = expanded,
-            onAssetCodeClick = {
-                expanded = true
-            },
-            onDismissDropDownClick = {
-                expanded = false
-            },
-            onDropDownItemClick = { newCurrencies ->
-                selectedCurrency = newCurrencies
-                expanded = false
-            }
-        )
-    }
-
-    HorizontalDivider(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 3.dp),
-        thickness = 2.dp,
-        color = Color.Black
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
-            .background(Color(0xFFF0E6FF))
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Bottom
     ) {
-
-        // Calculator content
-        Column(
-            modifier = Modifier.fillMaxSize()
-                .padding(horizontal = 12.dp, vertical = 30.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp, bottom = 3.dp),
+            thickness = 2.dp,
+            color = Color.Black
         )
-        {
-            // Date picker row
-            DatePickerRow(
-                selectedDate = selectedDate,
-                onDateSelected = { newDate ->
-                    selectedDate = newDate
+
+        when(selectedCategory) {
+            assetCategories[2] -> AmountAndAssetSection(
+                assetSymbol = "Share:",
+                assetAmount = stockShare,
+                assetCode = selectedStock,
+                assetList = stockCode,
+                expanded = expanded,
+                onAssetCodeClick = {
+                    expanded = true
+                },
+                onDismissDropDownClick = {
+                    expanded = false
+                },
+                onDropDownItemClick = { newStock ->
+                    selectedStock = newStock
+                    expanded = false
                 }
             )
+            assetCategories[1] -> AmountAndAssetSection(
+                assetSymbol = "Coin:",
+                assetAmount = cryptoAmount,
+                assetCode = selectedCrypto,
+                assetList = cryptoCode,
+                expanded = expanded,
+                onAssetCodeClick = {
+                    expanded = true
+                },
+                onDismissDropDownClick = {
+                    expanded = false
+                },
+                onDropDownItemClick = { newCrypto ->
+                    selectedCrypto = newCrypto
+                    expanded = false
+                }
+            )
+            else -> AmountAndAssetSection(
+                assetSymbol = currencySymbol,
+                assetAmount = currencyAmount,
+                assetCode = selectedCurrency,
+                assetList = currencies,
+                expanded = expanded,
+                onAssetCodeClick = {
+                    expanded = true
+                },
+                onDismissDropDownClick = {
+                    expanded = false
+                },
+                onDropDownItemClick = { newCurrencies ->
+                    selectedCurrency = newCurrencies
+                    expanded = false
+                }
+            )
+        }
 
-            Spacer(modifier = Modifier.height(40.dp))
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 3.dp),
+            thickness = 2.dp,
+            color = Color.Black
+        )
 
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFFF0E6FF))
+                .padding(top = 10.dp)
+        ) {
             KeypadGrid(
                 onAmountChanged = { newAmount ->
-                    when(selectedCategory) {
+                    when (selectedCategory) {
                         assetCategories[1] -> cryptoAmount = newAmount
                         assetCategories[2] -> stockShare = newAmount
                         else -> currencyAmount = newAmount
@@ -212,9 +202,68 @@ fun AddAssetTab(
                     amountValue = newAmount
                 },
                 onOkPressed = {
+                    when (selectedCategory) {
+                        assetCategories[1] -> {
+                            assetViewModel.addAsset(
+                                token = token,
+                                category = selectedCategory.name,
+                                type = selectedCrypto,
+                                value = cryptoAmount.toFloat()
+                            )
+                        }
+
+                        assetCategories[2] -> {
+                            assetViewModel.addAsset(
+                                token = token,
+                                category = selectedCategory.name,
+                                type = selectedStock,
+                                value = stockShare.toFloat()
+                            )
+                        }
+
+                        else -> {
+                            assetViewModel.addAsset(
+                                token = token,
+                                category = selectedCategory.name,
+                                type = selectedCurrency,
+                                value = currencyAmount.toFloat()
+                            )
+                        }
+                    }
                 },
                 key = selectedCategory
             )
+        }
+    }
+
+    when(addAssetState) {
+        is AssetState.Idle -> {
+            // Do nothing
+        }
+        is AssetState.SuccessAdding -> {
+            SuccessDialog(
+                onDismissRequest = {
+                    assetViewModel.setStateIdle()
+                    assetViewModel.getAsset(token, "USD")
+                },
+                dialogText = stringResource(R.string.success_adding_new_asset)
+            )
+        }
+        is AssetState.Error -> {
+            val errorMessage = addAssetState.message
+            openAlertDialog = true
+            if (openAlertDialog) {
+                ErrorDialog(
+                    onDismissRequest = {
+                        openAlertDialog = false
+                        assetViewModel.setStateIdle()
+                    },
+                    dialogText = errorMessage
+                )
+            }
+        }
+        else -> {
+            // Do nothing
         }
     }
 }

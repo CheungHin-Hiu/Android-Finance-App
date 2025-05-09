@@ -1,4 +1,4 @@
-package com.example.androidfinanceapp.ui.Overview
+package com.example.androidfinanceapp.ui.overview
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -13,7 +13,6 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.androidfinanceapp.TopFinanceApplication
 import com.example.androidfinanceapp.data.TransactionRepository
 import com.example.androidfinanceapp.network.TransactionsResponse
-import com.example.androidfinanceapp.ui.signup.SignupViewModel
 import kotlinx.coroutines.launch
 
 sealed interface GetTransactionState{
