@@ -5,11 +5,10 @@ from API.model.GET_login_request import LoginRequest
 from API.model.GET_register_request import RegisterRequest
 from API.model.GET_transactions import TransactionsGetRequest
 # from API.model.POST_transaction_item import TransactionPostRequest
-from API.model.GET_target import TargetGetRequest
 from API.model.POST_target import TargetPostRequest
 
 from services.authentication.controller.auth_controller import LoginController, RegisterController
-from services.finance_service.finance_data_scraper import get_batch_yahoo_stock_data, get_yahoo_currency_rate
+from services.finance.finance_data_scraper import get_finance_data
 from services.transaction.transaction import TransactionController
 from services.user_target.target import TargetController
 
@@ -51,17 +50,11 @@ class APIRouteDefintion:
     async def _get_finance_data_operation(self, request_entity: RequestFinanceData):
         requested_items = request_entity.model_dump()
 
-        # currency
-        currency_response = await get_yahoo_currency_rate(requested_items['currency'])
+        finance_data_response = await get_finance_data(
+            currencies=requested_items['currency'], stocks=requested_items['stock'], cryptos=requested_items['crypto']
+        )
 
-        # stock
-        stock_response = await get_batch_yahoo_stock_data(requested_items['stock'])
-
-        # crypto
-        crypto_list = [crypto + "-USD" for crypto in requested_items['crypto']]
-        crypto_response = await get_batch_yahoo_stock_data(crypto_list)
-
-        return {"currency": currency_response, "stock": stock_response, "crypto": crypto_response}
+        return finance_data_response
     
     # endpoint: _____/transaction, method: POST
     # async def _post_transaction_data(self, request_entity: TransactionPostRequest ):
@@ -82,10 +75,9 @@ class APIRouteDefintion:
         )
     
     # endpoint: _____/target, method: GET
-    async def _get_targets_by_user(self, user_id: str):
-        # target_item = request_entity.model_dump()
-        return await self.target_controller.get_targets_by_user(user_id)
+    async def _get_targets_by_user(self, token: str):
+        return await self.target_controller.get_targets_by_user(token)
 
     # endpoint: _____/target, method: DELETE
-    async def _delete_target_by_user(self, user_id: str):
-        return await self.target_controller.delete_target_by_user(user_id)
+    async def _delete_target_by_user(self, token: str):
+        return await self.target_controller.delete_target_by_user(token)
