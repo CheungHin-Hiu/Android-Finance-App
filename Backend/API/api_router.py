@@ -33,8 +33,8 @@ class APIRouteDefintion:
         # self.router.add_api_route("/transaction",  self._post_transaction_data, methods=["POST"])
         
         self.router.add_api_route("/target", self._insert_target, methods=["POST"])
-        self.router.add_api_route("/target/{user_id}", self._get_targets_by_user, methods=["GET"])
-        self.router.add_api_route("/target/{user_id}", self._delete_target_by_user, methods=["DELETE"])
+        self.router.add_api_route("/target/{token}", self._get_targets_by_user, methods=["GET"])
+        self.router.add_api_route("/target/{token}", self._delete_target_by_user, methods=["DELETE"])
 
     # endpoint: _____/login, method: GET
     async def _get_login_operation(self, request_entity: LoginRequest):
@@ -57,7 +57,11 @@ class APIRouteDefintion:
         # stock
         stock_response = await get_batch_yahoo_stock_data(requested_items['stock'])
 
-        return {"currency": currency_response, "stock": stock_response}
+        # crypto
+        crypto_list = [crypto + "-USD" for crypto in requested_items['crypto']]
+        crypto_response = await get_batch_yahoo_stock_data(crypto_list)
+
+        return {"currency": currency_response, "stock": stock_response, "crypto": crypto_response}
     
     # endpoint: _____/transaction, method: POST
     # async def _post_transaction_data(self, request_entity: TransactionPostRequest ):
