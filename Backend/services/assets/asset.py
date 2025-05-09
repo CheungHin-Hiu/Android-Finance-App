@@ -25,14 +25,14 @@ class AssetController:
                 asset["converted_amount"] = float(await currency_conversion(asset["type"].upper(), target_currency, asset["amount"]))
             elif asset["category"].upper() == 'STOCK' :
                 result = await get_finance_data(stocks=[asset['type'].upper()])
-                result = result['stock'][asset['type']][0]["Close"] * usd_to_target_currency
+                result = result['stock'][asset['type']][0]["Close"] * int(asset["amount"]) * usd_to_target_currency
                 # print(result * usd_to_target_currency)
                 asset["converted_amount"] = float(result)
                 
             elif asset["category"].upper() == "CRYPTO":
                 result = await get_finance_data(cryptos=[asset['type'].upper()])
                 # result
-                result = result['crypto'][asset['type'] + "-USD" ][0]["Close"] * usd_to_target_currency
+                result = result['crypto'][asset['type'] + "-USD" ][0]["Close"] * int(asset["amount"]) * usd_to_target_currency
                 asset["converted_amount"] = float(result)
                 
             asset.pop("_id", None)
