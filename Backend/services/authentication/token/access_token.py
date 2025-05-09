@@ -3,6 +3,8 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 
+import jwt.exceptions
+
 
 class JWTGenerator:
     def __init__ (self) -> None:
@@ -23,13 +25,15 @@ class JWTGenerator:
             decoded = jwt.decode(token, self._secret_key,self._algorithm)
             return decoded
         
-        except jwt.ExpiredSignatureError:
+        except jwt.exceptions.ExpiredSignatureError:
             print("Token has expired")
             return False
-            
-        except jwt.InvalidTokenError:
+        
+        except jwt.exceptions.InvalidTokenError:
             print("'Invalid token'")
             return False
+        
         except Exception as e:
             print(e)
             return False
+            
