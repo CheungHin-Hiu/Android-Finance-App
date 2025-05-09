@@ -2,22 +2,39 @@ from pymongo.mongo_client import MongoClient
 from bson import ObjectId
 from datetime import datetime
 from ..authentication.token.access_token import JWTGenerator
-
+from ..finance.currency_conversion import currency_conversion
+from services.finance.finance_data_scraper import get_finance_data
 class AssetController:
 
     def __init__(self, database_entity: MongoClient):
         self._transaction_collection = database_entity['COMP4521']["assets"]
         self.token_generator = JWTGenerator()
     
-    async def get_asset(self, token):
+    async def get_asset(self, token, target_currency):
         user_payload = self.token_generator.verify_jwt_token(token)
         user_id = str(user_payload['user_id'])
 
         assets = list(self._transaction_collection.find({"user_id": user_id}))
+        # print(f"token {token},  currency {currency}")
         
+        usd_to_target_currency =  await currency_conversion("USD", target_currency.upper(), 1) 
         for asset in assets:
-            
+
             asset["id"] = str(asset["_id"])
+            if asset['category'].upper() == 'CURRENCY':
+                asset["converted_amount"] = float(await currency_conversion(asset["type"].upper(), target_currency, asset["amount"]))
+            elif asset["category"].upper() == 'STOCK' :
+                result = await get_finance_data(stocks=[asset['type'].upper()])
+                result = result['stock'][asset['type']][0]["Close"] * usd_to_target_currency
+                # print(result * usd_to_target_currency)
+                asset["converted_amount"] = float(result)
+                
+            elif asset["category"].upper() == "CRYPTO":
+                result = await get_finance_data(cryptos=[asset['type'].upper()])
+                # result
+                result = result['crypto'][asset['type'] + "-USD" ][0]["Close"] * usd_to_target_currency
+                asset["converted_amount"] = float(result)
+                
             asset.pop("_id", None)
             asset.pop("user_id", None)
         return assets

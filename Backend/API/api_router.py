@@ -41,7 +41,7 @@ class APIRouteDefintion:
         self.router.add_api_route("/transaction",  self._get_transactions_by_user, methods=["GET"])
         self.router.add_api_route("/transaction/{token}",  self._post_transaction_data, methods=["POST"])
 
-        self.router.add_api_route("/asset/{token}", self._get_assest_by_user, methods=["GET"])
+        self.router.add_api_route("/asset/{token}/{currency}", self._get_assest_by_user, methods=["GET"])
         self.router.add_api_route("/asset/{token}", self._add_assest_by_user, methods=["POST"])
         self.router.add_api_route("/asset/{token}", self._modify_assest_by_item, methods=["PUT"])
         self.router.add_api_route("/asset/{token}", self._delete_asset_by_item, methods=["DELETE"])
@@ -106,10 +106,10 @@ class APIRouteDefintion:
             raise HTTPException(status_code=400, detail='Bad Request')
         return await self.target_controller.delete_target_by_user(token)
 
-    async def _get_assest_by_user(self, token: str):
+    async def _get_assest_by_user(self, token: str,currency:str):
         if not token:
             return {"status": 400}
-        return await self.assets_controller.get_asset(token)
+        return await self.assets_controller.get_asset(token, currency)
     
     async def _add_assest_by_user(self, token:str, request_entity: InsertAssetRequest):
         if not token:
