@@ -44,7 +44,7 @@ fun TopFinanceApp() {
     Scaffold { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = Screens.AssetStatisticScreen.route,
+            startDestination = Screens.LoginScreen.route,
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
             composable(Screens.LoginScreen.route) {
