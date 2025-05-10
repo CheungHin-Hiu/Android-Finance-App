@@ -107,7 +107,8 @@ fun SignupScreen(
                         signupViewModel.setUiStateIdle()
                         navController.popBackStack(Screens.LoginScreen.route, false)
                     },
-                    dialogText = stringResource(R.string.sign_up_success_dialog)
+                    dialogText = stringResource(R.string.sign_up_success_dialog),
+                    buttonText = stringResource(R.string.return_login_button_text)
                 )
             }
             is SignupUiState.Error -> {
@@ -133,6 +134,7 @@ fun SignupScreen(
 fun SuccessDialog(
     onDismissRequest: () -> Unit,
     dialogText: String,
+    buttonText: String,
 ) {
     BasicAlertDialog(
         onDismissRequest = onDismissRequest,
@@ -159,7 +161,7 @@ fun SuccessDialog(
                     Button(
                         onClick = onDismissRequest
                     ) {
-                        Text(text = stringResource(R.string.return_login_button))
+                        Text(text = buttonText)
                     }
                 }
             }

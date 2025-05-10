@@ -9,11 +9,13 @@ import retrofit2.Response
 interface AssetRepository {
     suspend fun getAsset(token: String, currency: String): Response<GetAssetsResponse>
 
+    suspend fun getConversionRate(currency: String): Response<Float>
+
     suspend fun addAsset(token: String, category: String, type: String, amount: Float): Response<Unit>
 
-    suspend fun modifyAsset(token: String, id: Int, amount: Float): Response<Unit>
+    suspend fun modifyAsset(token: String, id: String, amount: Float, category: String, type: String): Response<Unit>
 
-    suspend fun deleteAsset(token: String, id: Int): Response<Unit>
+    suspend fun deleteAsset(token: String, id: String): Response<Unit>
 }
 
 class NetworkAssetRepository(
@@ -24,21 +26,32 @@ class NetworkAssetRepository(
         currency: String
     ): Response<GetAssetsResponse> = assetAPiService.getAsset(token = token, currency = currency)
 
+    override suspend fun getConversionRate(currency: String): Response<Float>
+        = assetAPiService.getConversionRate(currency = currency)
+
     override suspend fun addAsset(
         token: String,
         category: String,
         type: String,
         amount: Float
-    ) = assetAPiService.addAsset(token = token, request = CreateAssetRequest(category, type, amount))
+    ) = assetAPiService.addAsset(
+        token = token,
+        request = CreateAssetRequest(category, type, amount)
+    )
 
     override suspend fun modifyAsset(
         token: String,
-        id: Int,
+        id: String,
         amount: Float,
-    ) = assetAPiService.modifyAsset(token = token, request = ModifyAssetRequest(id, amount))
+        category: String,
+        type: String
+    ) = assetAPiService.modifyAsset(
+        token = token,
+        request = ModifyAssetRequest(id, amount, category, type)
+    )
 
     override suspend fun deleteAsset(
         token: String,
-        id: Int,
+        id: String,
     ) = assetAPiService.deleteAsset(token = token, id = id)
 }

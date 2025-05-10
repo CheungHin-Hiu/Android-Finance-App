@@ -4,9 +4,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -86,6 +83,17 @@ import com.example.androidfinanceapp.ui.common.ScreenTopBar
 import com.example.androidfinanceapp.ui.login.ErrorDialog
 import java.time.LocalDate
 
+val years = (2000..LocalDate.now().year).sortedByDescending {it}
+
+val monthsList = listOf(
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+)
+
+val currencyList = listOf("HKD", "USD", "JPY", "CNY")
+
+
+
 @Composable
 fun AssetStatisticsScreen(
     navController: NavController,
@@ -93,24 +101,23 @@ fun AssetStatisticsScreen(
     assetViewModel: AssetStatisticsViewModel = viewModel(factory = AssetStatisticsViewModel.Factory)
 ) {
     val token by dataStoreManager.tokenFlow.collectAsState("initial")
+    val username by dataStoreManager.usernameFlow.collectAsState("initial")
 
     val assetStatisticState = assetViewModel.assetStatisticState
 
-
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val scrollState = rememberScrollState()
 
     var yearSelected by remember { mutableStateOf(LocalDate.now().year) }
     var currencySelected by remember { mutableStateOf("USD") }
 
-    var pieChartData = mapOf<String, Float>()
 
     var openAlertDialog by remember { mutableStateOf(false)}
 
     LaunchedEffect(Unit) {
-        assetViewModel.getAsset(token, "USD")
-        pieChartData = getPieChartData(assetViewModel.assetList)
+        assetViewModel.getAssetTotalOfMonth(username)
+        assetViewModel.getAsset(username, token, currencySelected)
+        assetViewModel.getCurrencyExchangeRate(currencySelected)
     }
 
     AppNavigationDrawer(
@@ -166,8 +173,7 @@ fun AssetStatisticsScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
-                    .scrollable(scrollState, orientation = Orientation.Vertical),
+                    .padding(innerPadding),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(
@@ -181,13 +187,14 @@ fun AssetStatisticsScreen(
                         year = yearSelected,
                         onYearSelected = {newYear ->
                             yearSelected = newYear
-                            assetViewModel.getAssetTotalByYear(yearSelected)
+                            assetViewModel.getAssetTotalByYear(username, yearSelected)
                         }
                     )
                     CurrencyDropdownList(
                         currency = currencySelected,
                         onCurrencySelected = {newCurrency ->
                             currencySelected = newCurrency
+                            assetViewModel.getCurrencyExchangeRate(currencySelected)
                         }
                     )
                 }
@@ -204,7 +211,7 @@ fun AssetStatisticsScreen(
                         .padding(vertical = 4.dp)
                 )
 
-                AssetLineChart(assetViewModel.assetTotalStatisticList.value)
+                AssetLineChart(assetViewModel.assetTotalStatisticList.value, assetViewModel.exchangeRate.value)
 
                 HorizontalDivider(
                     thickness = 2.dp,
@@ -223,8 +230,8 @@ fun AssetStatisticsScreen(
                         .padding(vertical = 4.dp)
                 )
 
-                if (pieChartData.isNotEmpty()) {
-                    AssetStatisticDonutChart(pieChartData)
+                if (assetViewModel.pieChartData.value.isNotEmpty()) {
+                    AssetStatisticDonutChart(assetViewModel.pieChartData.value)
                 } else {
                     Text("No data available")
                 }
@@ -255,16 +262,6 @@ fun AssetStatisticsScreen(
     }
 }
 
-
-
-private fun getPieChartData(assetList: List<Asset>): Map<String, Float> {
-    val result: MutableMap<String, Float> = mutableMapOf()
-    assetList.forEach { asset ->
-        result[asset.category] = result.getOrDefault(asset.category, 0f) + asset.value
-    }
-    return result
-}
-
 @Composable
 fun YearDropdownList(
     year: Int = LocalDate.now().year,
@@ -272,10 +269,7 @@ fun YearDropdownList(
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val years = remember {
-        (2000..LocalDate.now().year)
-            .sortedByDescending {it}
-    }
+
 
     Box(modifier = modifier.wrapContentSize(Alignment.TopStart)) {
         Row(
@@ -332,7 +326,6 @@ fun CurrencyDropdownList(
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val currencyList = remember { listOf("HKD", "USD", "JPY", "CNY") }
 
     Box(modifier = modifier.wrapContentSize(Alignment.TopStart)) {
         Row(
@@ -385,7 +378,8 @@ fun CurrencyDropdownList(
 
 @Composable
 fun AssetLineChart(
-    assetTotal: List<AssetTotal>
+    assetTotal: List<AssetTotal>,
+    exchangeRate: Float
 ) {
 
     val steps = 10
@@ -396,7 +390,7 @@ fun AssetLineChart(
     for (asset in assetTotal) {
         // Adjust month index (0-based index)
         val monthIndex = asset.month - 1
-        assetTotalValues[monthIndex] = asset.value
+        assetTotalValues[monthIndex] = asset.value * exchangeRate
     }
 
     // Convert null values to 0f or handle them as needed for your chart
@@ -408,10 +402,6 @@ fun AssetLineChart(
     val assetValueMax = assetTotalValuesWithZeroStart.maxOrNull() ?: 0f
     val standardizedAssetValue = standardizeNumber(assetTotalValuesWithZeroStart)
 
-    val monthsList = listOf(
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-    )
     val monthStringList = listOf("") + monthsList
 
     val pointData = standardizedAssetValue.mapIndexed { index, value ->

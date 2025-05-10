@@ -2,6 +2,7 @@ package com.example.androidfinanceapp.ui.asset
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -40,7 +41,7 @@ sealed interface AssetStatisticState {
 }
 
 data class Asset(
-    val id: Int,
+    val id: String,
     val category: String,
     val type: String,
     val description: String,
@@ -49,6 +50,8 @@ data class Asset(
     val createdAt: String,
     val updatedAt: String,
 )
+
+val currentDateTime = LocalDate.now()
 
 class AssetStatisticsViewModel(
     private val assetRepository: AssetRepository,
@@ -60,31 +63,14 @@ class AssetStatisticsViewModel(
     val assetTotalThisMonth: MutableState<AssetTotal?> = mutableStateOf(null)
     var assetStatisticState: AssetStatisticState by mutableStateOf(AssetStatisticState.Idle)
         private set
-
     var assetList = mutableStateListOf<Asset>()
         private set
-
-    val username = dataStoreManager.usernameFlow.toString()
-    val currentDateTime = LocalDate.now()
-
-    init {
-        viewModelScope.launch {
-
-            assetTotalStatisticList.value = assetTotalRepository.getAllAssetTotalsForYear(
-                username = username,
-                year = currentDateTime.year
-            )
-
-            assetTotalThisMonth.value = assetTotalRepository.getAssetTotalForThisMonth(
-                username = username,
-                year = currentDateTime.year,
-                month = currentDateTime.month.value
-            )
-        }
-    }
+    val pieChartData: MutableState<Map<String, Float>> = mutableStateOf(emptyMap())
+    val exchangeRate: MutableState<Float> = mutableStateOf(1f)
 
 
-    fun getAsset(token: String, currency: String) {
+    fun getAsset(username: String, token: String, currency: String) {
+        Log.d("Called get asset", "Get asset being called")
         viewModelScope.launch {
             try {
                 val response = assetRepository.getAsset(token, currency)
@@ -93,15 +79,30 @@ class AssetStatisticsViewModel(
                         assetStatisticState = AssetStatisticState.SuccessFetching
                         assetList.clear()
                         assetList.addAll(getAssetResponseParsing(it.assets))
+                        pieChartData.value = getPieChartData(assetList)
                         val assetTotal = calculateAssetTotal(assetList)
-                        if (!assetTotalThisMonth.isNotNull() || assetTotal != assetTotalThisMonth.value?.value) {
+                        if (assetTotalThisMonth.value.isNotNull()) {
+                            Log.d("Update executed", "update")
+                            Log.d("Original asset", assetTotalThisMonth.toString() )
                             assetTotalRepository.updateAssetTotalThisMonthAndYear(
                                 username = username ,
                                 year = currentDateTime.year,
                                 month = currentDateTime.month.value,
                                 value = assetTotal
                             )
+                        } else {
+                            Log.d("Insert executed", "insert")
+                            assetTotalRepository.insertAssetTotal(
+                                AssetTotal(
+                                    id = 0,
+                                    username = username,
+                                    year = currentDateTime.year,
+                                    month = currentDateTime.month.value,
+                                    value = assetTotal,
+                                )
+                            )
                         }
+                        getAssetTotalByYear(username, currentDateTime.year )
                     }
                 } else {
                     assetStatisticState = AssetStatisticState.Error("Error in getting asset: ${response.message()}" )
@@ -113,10 +114,30 @@ class AssetStatisticsViewModel(
         }
     }
 
-    fun getAssetTotalByYear(year: Int) {
+    fun getAssetTotalByYear(username: String, year: Int) {
         viewModelScope.launch {
             assetTotalStatisticList.value = assetTotalRepository.getAllAssetTotalsForYear(username, year)
             Log.d("Executed get asset by year", "executed")
+        }
+    }
+
+    fun getAssetTotalOfMonth(username: String) {
+        viewModelScope.launch {
+            assetTotalThisMonth.value = assetTotalRepository.getAssetTotalForThisMonth(
+                username, currentDateTime.year, currentDateTime.month.value)
+        }
+    }
+
+    fun getCurrencyExchangeRate(currency: String) {
+        viewModelScope.launch {
+            val response = assetRepository.getConversionRate(currency)
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    exchangeRate.value = it
+                }
+            } else {
+                assetStatisticState = AssetStatisticState.Error("Error in getting asset: ${response.message()}" )
+            }
         }
     }
 
@@ -148,6 +169,14 @@ class AssetStatisticsViewModel(
             }
         }
     }
+}
+
+private fun getPieChartData(assetList: List<Asset>): Map<String, Float> {
+    val result: MutableMap<String, Float> = mutableMapOf()
+    assetList.forEach { asset ->
+        result[asset.category] = result.getOrDefault(asset.category, 0f) + asset.value
+    }
+    return result
 }
 
 class AssetViewModel(private val assetRepository: AssetRepository): ViewModel() {
@@ -195,10 +224,10 @@ class AssetViewModel(private val assetRepository: AssetRepository): ViewModel() 
         }
     }
 
-    fun modifyAsset(token: String, id: Int, amount: Float) {
+    fun modifyAsset(token: String, id: String, amount: Float, category: String, type: String) {
         viewModelScope.launch {
             try {
-                val response = assetRepository.modifyAsset(token, id, amount)
+                val response = assetRepository.modifyAsset(token, id, amount, category, type)
                 if(response.isSuccessful) {
                     response.body()?.let {
                         assetState = AssetState.SuccessModifying
@@ -213,7 +242,7 @@ class AssetViewModel(private val assetRepository: AssetRepository): ViewModel() 
         }
     }
 
-    fun deleteAsset(token: String, id: Int) {
+    fun deleteAsset(token: String, id: String) {
         viewModelScope.launch {
             try {
                 val response = assetRepository.deleteAsset(token, id)
@@ -248,17 +277,11 @@ class AssetViewModel(private val assetRepository: AssetRepository): ViewModel() 
 
 private fun getAssetResponseParsing(respondedList: List<GetAssetResponse>): MutableList<Asset> {
     return respondedList.map { assetResponse ->
-        val descriptionPrefix = when (assetResponse.category) {
-            "Cryptocurrency" -> "Coin: "
-            "Stock" -> "Share: "
-            else -> currencySymbols[assetResponse.type] + ": "
-        }
-
         Asset(
             id = assetResponse.id,
             category = assetResponse.category,
             type = assetResponse.type,
-            description = descriptionPrefix + assetResponse.amount,
+            description = assetResponse.category + ": " + assetResponse.type,
             amount = assetResponse.amount,
             value = assetResponse.value,
             createdAt = assetResponse.createdAt,

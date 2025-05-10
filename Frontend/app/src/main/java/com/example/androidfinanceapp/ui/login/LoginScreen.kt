@@ -113,11 +113,12 @@ fun LoginScreen(
         }
         is LoginUiState.Success -> {
             val loginResponse = loginUiState.loginResponse
+            loginViewModel.setUiStateIdle()
             // Saved the received the received user external id and JWT token in DataStore
             coroutineScope.launch {
-                dataStoreManager.saveLoginData(loginResponse.userId, loginResponse.userName, loginResponse.token)
+               dataStoreManager.saveLoginData(loginResponse.userId, loginResponse.userName, loginResponse.token)
+                navController.navigate(Screens.OverviewScreen.route)
             }
-            navController.navigate(Screens.OverviewScreen.route)
         }
         is LoginUiState.Error -> {
             val errorMessage = loginUiState.message

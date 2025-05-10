@@ -1,5 +1,6 @@
 package com.example.androidfinanceapp.ui.asset
 
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -56,6 +57,7 @@ import com.example.androidfinanceapp.R
 import com.example.androidfinanceapp.ui.login.ErrorDialog
 import com.example.androidfinanceapp.ui.signup.SuccessDialog
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 val assetTypeList = listOf(
@@ -81,11 +83,11 @@ fun ManageAssetTab(
     token: String,
     assetViewModel: AssetViewModel,
 ) {
-    var assetType by remember { mutableStateOf("All") }
+    var assetCategory by remember { mutableStateOf("All") }
     var dateRange by remember { mutableStateOf("This week") }
 
     val modifyAssetState = assetViewModel.assetState
-    val filteredAssetList = filterAssetList(assetViewModel.assetList, assetType, dateRange)
+    val filteredAssetList = filterAssetList(assetViewModel.assetList, assetCategory, dateRange)
 
     var openAlertDialog by remember { mutableStateOf(false) }
 
@@ -98,10 +100,10 @@ fun ManageAssetTab(
     ) {
         AssetDropDownList(
             label = stringResource(R.string.asset_type_dropdown_label),
-            selectedOption = assetType,
+            selectedOption = assetCategory,
             options = assetTypeList,
-            onListItemClick = { newAssetType ->
-                assetType = newAssetType
+            onListItemClick = { newAssetCategory ->
+                assetCategory = newAssetCategory
             }
         )
 
@@ -123,17 +125,21 @@ fun ManageAssetTab(
 
     LazyColumn {
         items(filteredAssetList) { asset ->
+            val amountSuffix = getAmountSuffix(asset.category.toString())
             AssetManagementCard(
                 description = asset.description,
-                amount = asset.amount.toString(),
+                amount =  asset.amount.toString(),
                 value = asset.value.toString(),
-                createdAt = "Created at:" + asset.createdAt,
-                updatedAt = "Updated at:"+ asset.updatedAt,
+                amountSuffix = amountSuffix,
+                createdAt = "Created at: " + transformDate(asset.createdAt),
+                updatedAt = "Updated at: "+ transformDate(asset.updatedAt),
                 onModifyClick = { newAmount ->
                     assetViewModel.modifyAsset(
                         token =  token,
                         id = asset.id,
-                        amount = newAmount.toFloat()
+                        amount = newAmount.toFloat(),
+                        category = asset.category,
+                        type = asset.type,
                     )
                 },
                 onDeleteClick = {
@@ -156,7 +162,8 @@ fun ManageAssetTab(
                     assetViewModel.setStateIdle()
                     assetViewModel.getAsset(token, currency = "USD")
                 },
-                dialogText = stringResource(R.string.success_modifying_asset_value)
+                dialogText = stringResource(R.string.success_modifying_asset_value),
+                buttonText = stringResource(R.string.confirm)
             )
         }
         is AssetState.SuccessDeleting -> {
@@ -165,7 +172,8 @@ fun ManageAssetTab(
                     assetViewModel.setStateIdle()
                     assetViewModel.getAsset(token, currency = "USD")
                 },
-                dialogText = stringResource(R.string.successfully_delete_asset)
+                dialogText = stringResource(R.string.successfully_delete_asset),
+                stringResource(R.string.confirm)
             )
         }
         is AssetState.Error -> {
@@ -187,13 +195,32 @@ fun ManageAssetTab(
     }
 }
 
+private fun getAmountSuffix(categoryString: String): String {
+    val suffix = when(categoryString) {
+        "Coin" -> " Coin"
+        "Stock" -> " Share"
+        else -> ""
+    }
+    return suffix
+}
+
+private fun transformDate(inputDate: String): String {
+    // Define the input and output date formats
+    val inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+    val outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd:HH:mm")
+
+    // Parse the input string to a LocalDateTime object and reformat it
+    val dateTime = LocalDateTime.parse(inputDate, inputFormatter)
+    return dateTime.format(outputFormatter)
+}
+
 private fun filterAssetList(
     assetList: MutableList<Asset>,
     assetType: String,
     dateRange: String,
 ): List<Asset> {
     // Define a date formatter that matches the format of the createdAt string.
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
     // Get the current date
     val currentDate = LocalDate.now()
@@ -209,7 +236,7 @@ private fun filterAssetList(
 
     return assetList.filter { asset ->
         // Filter by asset type
-        val matchesType = assetType == "All" || asset.type == assetType
+        val matchesType = assetType == "All" || asset.category == assetType
 
         // Parse the createdAt date
         val assetDate = LocalDate.parse(asset.createdAt, formatter)
@@ -301,6 +328,7 @@ fun AssetManagementCard(
     description: String,
     amount: String,
     value: String,
+    amountSuffix: String,
     createdAt: String,
     updatedAt: String,
     onModifyClick: (String) -> Unit,
@@ -338,7 +366,7 @@ fun AssetManagementCard(
                 )
                 Spacer(Modifier.padding(bottom = 2.dp))
                 Text(
-                    text = amount,
+                    text = "Hold: $amount $amountSuffix",
                     style = TextStyle(
                         color = Color(71, 42, 124),
                         fontSize = 18.sp,
@@ -347,7 +375,7 @@ fun AssetManagementCard(
                 )
                 Spacer(Modifier.padding(bottom = 2.dp))
                 Text(
-                    text = value,
+                    text = "Value: $value USD($)",
                     style = TextStyle(
                         color = Color(71, 42, 124),
                         fontSize = 18.sp,
@@ -388,6 +416,7 @@ fun AssetManagementCard(
                 showDialog = false
             },
             onModifyConfirm = { newAmount ->
+                Log.d("New amount in message pop", newAmount.toString())
                 onModifyClick(newAmount)
                 showDialog = false
             },
@@ -485,7 +514,7 @@ fun ManageAssetPopUp(
 
                         // Modify Button
                         Button(
-                            onClick = { onModifyConfirm(currentAmount) },
+                            onClick = { onModifyConfirm(textFieldAmount.text) },
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                         ) {
                             Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.modify_button))

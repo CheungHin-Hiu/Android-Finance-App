@@ -50,7 +50,17 @@ val currencySymbols = mapOf(
 
 val stockCode = listOf("AAPL", "AMZN", "GOOG", "NVDA")
 
-val cryptoCode = listOf("BTC", "ETH", "USDT")
+val cryptoCode = listOf("BTC", "ETH", "USDT", "DOGE")
+
+val assetCategories =
+    listOf(
+        CategoryItem(1, R.drawable.salary, "Cash"),
+        CategoryItem(2, R.drawable.cryptocurrency, "Crypto"),
+        CategoryItem(3, R.drawable.stock_market, "Stock"),
+        CategoryItem(4, R.drawable.jewellery, "Jewellery"),
+        CategoryItem(5, R.drawable.real_estate, "Real Estate"),
+        CategoryItem(6, R.drawable.other_asset, "Other")
+    )
 
 @Composable
 fun AddAssetTab(
@@ -67,16 +77,6 @@ fun AddAssetTab(
     var amountValue by remember { mutableStateOf("") }
 
     // State for tracking the selected asset category
-    val assetCategories = remember {
-        listOf(
-            CategoryItem(1, R.drawable.salary, "Cash"),
-            CategoryItem(2, R.drawable.cryptocurrency, "Cryptocurrency"),
-            CategoryItem(3, R.drawable.stock_market, "Stock"),
-            CategoryItem(4, R.drawable.jewellery, "Jewellery"),
-            CategoryItem(5, R.drawable.real_estate, "Real Estate"),
-            CategoryItem(6, R.drawable.other_asset, "Other")
-        )
-    }
 
     // State for tracking the selected currency and amount
     var selectedCurrency by remember { mutableStateOf("HKD") }
@@ -246,7 +246,8 @@ fun AddAssetTab(
                     assetViewModel.setStateIdle()
                     assetViewModel.getAsset(token, "USD")
                 },
-                dialogText = stringResource(R.string.success_adding_new_asset)
+                dialogText = stringResource(R.string.success_adding_new_asset),
+                buttonText = stringResource(R.string.confirm)
             )
         }
         is AssetState.Error -> {
