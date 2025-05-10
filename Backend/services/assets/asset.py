@@ -34,10 +34,12 @@ class AssetController:
                 # result
                 result = result['crypto'][asset['type'] + "-USD" ][0]["Close"] * int(asset["amount"]) * usd_to_target_currency
                 asset["converted_amount"] = float(result)
-                
+            
+            else:
+                asset["converted_amount"] = float(await currency_conversion(asset["type"].upper(), target_currency, asset["amount"]))
             asset.pop("_id", None)
             asset.pop("user_id", None)
-        return assets
+        return {"assets": assets}
     
     async def add_asset(self, token, asset):
         user_payload = self.token_generator.verify_jwt_token(token)
