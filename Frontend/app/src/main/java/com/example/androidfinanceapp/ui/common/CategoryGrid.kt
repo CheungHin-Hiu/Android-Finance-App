@@ -91,18 +91,17 @@ fun CategoryItem(
     onSelected: (CategoryItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Fixed dimensions for consistency
     val itemWidth = 90.dp
-    val itemHeight = 100.dp  // Set a fixed height for all items
+    val itemHeight = 100.dp
 
     Box(
         modifier = modifier
             .width(itemWidth)
-            .height(itemHeight)  // Fixed height
+            .height(itemHeight)
             .clickable { onSelected(category) },
         contentAlignment = Alignment.Center
     ) {
-        // Background when selected - position it absolutely within the box
+        // Background when selected
         if (isSelected) {
             Box(
                 modifier = Modifier
@@ -117,7 +116,7 @@ fun CategoryItem(
             )
         }
 
-        // Content column - same for both states
+        // Content column
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,

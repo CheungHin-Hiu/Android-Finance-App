@@ -38,7 +38,7 @@ fun AppNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet(
                 modifier = Modifier.width(280.dp),
-                drawerContainerColor = Color(0xFFF8F0FF)    // light purple background
+                drawerContainerColor = Color(0xFFF8F0FF)
             ) {
                 // App Name/Logo
                 Box(
@@ -126,7 +126,7 @@ fun AppNavigationDrawer(
                     onClick = {
                         scope.launch {
                             drawerState.close()
-                            // Log out - clear token and navigate to login
+                            // Log out
                             scope.launch {
                                 navController.navigate(Screens.LoginScreen.route)
                             }
