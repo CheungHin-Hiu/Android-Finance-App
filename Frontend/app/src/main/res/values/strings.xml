@@ -28,4 +28,5 @@
     <string name="success_adding_new_asset">Success adding new asset</string>
     <string name="success_modifying_asset_value">Successfully modifying asset value</string>
     <string name="successfully_delete_asset">Successfully delete asset</string>
+    <string name="confirm">Confirm</string>
 </resources>

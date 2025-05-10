@@ -1,6 +1,8 @@
 from pymongo.mongo_client import MongoClient
 from bson import ObjectId
+import pytz
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from ..authentication.token.access_token import JWTGenerator
 from ..finance.currency_conversion import currency_conversion
 from services.finance.finance_data_scraper import get_finance_data
@@ -14,13 +16,22 @@ class AssetController:
         user_payload = self.token_generator.verify_jwt_token(token)
         user_id = str(user_payload['user_id'])
 
-        assets = list(self._transaction_collection.find({"user_id": user_id}))
+        assets = list(self._transaction_collection.find({"user_id": user_id}).sort("created_at", -1))
         # print(f"token {token},  currency {currency}")
         
+        hkt_tz = pytz.timezone('Asia/Hong_Kong')
         usd_to_target_currency =  await currency_conversion("USD", target_currency.upper(), 1) 
         for asset in assets:
 
             asset["id"] = str(asset["_id"])
+            if 'created_at' in asset:
+                created_at_utc = asset['created_at']
+                asset['created_at'] = created_at_utc.replace(tzinfo=pytz.utc).astimezone(hkt_tz).strftime('%Y-%m-%d %H:%M:%S')
+
+            if 'updated_at' in asset:
+                updated_at_utc = asset['updated_at']
+                asset['updated_at'] = updated_at_utc.replace(tzinfo=pytz.utc).astimezone(hkt_tz).strftime('%Y-%m-%d %H:%M:%S')
+
             if asset['category'].upper() == 'CURRENCY':
                 asset["converted_amount"] = float(await currency_conversion(asset["type"].upper(), target_currency, asset["amount"]))
             elif asset["category"].upper() == 'STOCK' :
@@ -45,7 +56,7 @@ class AssetController:
         user_payload = self.token_generator.verify_jwt_token(token)
         user_id = str(user_payload['user_id'])
 
-        now = datetime.now()
+        now = datetime.now(ZoneInfo("Asia/Hong_Kong"))
         asset_doc = {
             "user_id": user_id,
             "category": asset.get("category"),
@@ -66,7 +77,7 @@ class AssetController:
         update_data= new_asset.dict(exclude_unset=True)
         asset_id = update_data.get("id")
         update_data.pop("id", None)
-        update_data["updated_at"] = datetime.now()
+        update_data["updated_at"] = datetime.now(ZoneInfo("Asia/Hong_Kong"))
 
         
 
