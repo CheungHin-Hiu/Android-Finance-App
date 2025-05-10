@@ -36,7 +36,9 @@ class APIRouteDefintion:
         # route defintion
         self.router.add_api_route("/login", self._get_login_operation, methods=["POST"])
         self.router.add_api_route("/register", self._get_register_operation, methods=["POST"])
+
         self.router.add_api_route("/finance", self._get_finance_data_operation, methods=["POST"])
+        self.router.add_api_route("/finance/USD{to_currency}", self._get_usd_conversion_rate, methods=["GET"])
 
         self.router.add_api_route("/transaction",  self._get_transactions_by_user, methods=["GET"])
         self.router.add_api_route("/transaction/{token}",  self._post_transaction_data, methods=["POST"])
@@ -67,7 +69,17 @@ class APIRouteDefintion:
             currencies=requested_items['currency'], stocks=requested_items['stock'], cryptos=requested_items['crypto']
         )
         return finance_data_response   
-
+    
+    # endpoint: _____/finance/USD{to_currency}, method: GET
+    async def _get_usd_conversion_rate(self, to_currency: str):
+        finance_data = await get_finance_data()
+        conversion_rates = finance_data["currency"]
+        # check if conversion rate exists
+        if f"USD{to_currency.upper()}=X" not in conversion_rates:
+            raise HTTPException(status_code=404, detail="Conversion rate not found")
+        conversion_rate = conversion_rates[f"USD{to_currency.upper()}=X"]
+        return conversion_rate
+    
     # endpoint: _____/transaction, method: GET
     async def _get_transactions_by_user(self, request_entity: TransactionsGetRequest):
         transaction_item = request_entity.model_dump()
