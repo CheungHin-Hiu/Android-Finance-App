@@ -125,23 +125,23 @@ class APIRouteDefintion:
 
     async def _get_assest_by_user(self, token: str,currency:str):
         if not token:
-            return {"status": 400}
+            raise HTTPException(status_code=400, detail='Invalid Token')
         return await self.assets_controller.get_asset(token, currency)
     
     async def _add_assest_by_user(self, token:str, request_entity: InsertAssetRequest):
         if not token:
-            return {"status": 400}
+            raise HTTPException(status_code=400, detail='Invalid Token')
         assets = request_entity.model_dump()
         return await self.assets_controller.add_asset(token, assets)
     
     async def _modify_assest_by_item(self, token:str, request_entity: UpdateAssetRequest):
         if not token:
-            return {"status": 400}
+            raise HTTPException(status_code=400, detail='Invalid Token')
     
         return await self.assets_controller.modify_asset(token, request_entity)
     
     async def _delete_asset_by_item(self, token:str, asset_id: str ):
         if not token:
-            return {"status": 400}
+            raise HTTPException(status_code=400, detail='Invalid Token')
         
         return await self.assets_controller.del_asset(token, asset_id)
