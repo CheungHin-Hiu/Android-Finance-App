@@ -11,8 +11,8 @@ class TransactionController():
     async def insert_transaction(self, token: str , payload: dict) -> dict:
         user_payload = self.token_generator.verify_jwt_token(token)
         user_id = str(user_payload['user_id'])
-    
-        transaction_doc = {"token": user_id, **payload, "datetime":  datetime.now(timezone.utc)}
+
+        transaction_doc = {"user_id": user_id, **payload, "created_at":  datetime.now(timezone.utc)}
         result = self._transaction_collection.insert_one(transaction_doc)
         return {"status": 200, "transaction_id": str(result.inserted_id)}
     
@@ -21,11 +21,13 @@ class TransactionController():
 
         user_payload = self.token_generator.verify_jwt_token(token)
         user_id = str(user_payload['user_id'])
+
         cursor = self._transaction_collection.find({"user_id": user_id}).sort("datetime", -1)
         transactions = list(cursor)
         for transaction in transactions:
             transaction["transaction_id"] = str(transaction["_id"])
             transaction.pop("_id", None)
+            transaction.pop("user_id", None)
             if "datetime" in transaction:
                 transaction["datetime"] = transaction["datetime"].isoformat()
 
