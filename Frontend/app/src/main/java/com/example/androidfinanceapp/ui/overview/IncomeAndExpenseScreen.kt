@@ -44,6 +44,8 @@ import com.example.androidfinanceapp.ui.common.DatePickerRow
 import com.example.androidfinanceapp.ui.common.KeypadGrid
 import com.example.androidfinanceapp.ui.common.ManageScreenTopAppBar
 import com.example.androidfinanceapp.ui.common.evaluateExpression
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 
 @Composable
@@ -55,7 +57,6 @@ fun IncomeAndExpenseScreen(
         factory = IncomeAndExpenseViewModel.Factory
     )
 ) {
-    incomeAndExpenseViewModel.setAddIdle()
     val token by dataStoreManager.tokenFlow.collectAsState(initial = null)
     // Track which tab is selected (Expense or Income)
     var selectedTab by remember { mutableStateOf(0) }
@@ -63,7 +64,7 @@ fun IncomeAndExpenseScreen(
     // Track selected category
     var selectedCategory by remember { mutableStateOf<CategoryItem?>(null) }
 
-    // Add state for currency and amount
+    // state for currency and amount
     var selectedCurrency by remember { mutableStateOf("HKD") }
     var amount by remember { mutableStateOf("") }
 
@@ -109,7 +110,7 @@ fun IncomeAndExpenseScreen(
     // Get the appropriate category list based on the selected tab
     val categories = if (selectedTab == 0) expenseCategories else incomeCategories
 
-    var selectedDate by remember { mutableStateOf("2025/12/31(Wed)") }
+    var selectedDate by remember { mutableStateOf(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/M/d(EEE)"))) }
 
 
     // For error display
@@ -147,7 +148,7 @@ fun IncomeAndExpenseScreen(
                 showError = true
             }
             AddTransactionState.Idle -> {
-                // Nothing to do for idle state
+                // Nothing to do
             }
         }
     }
@@ -186,15 +187,11 @@ fun IncomeAndExpenseScreen(
         // Determine transaction type
         val type = if (selectedTab == 0) "expense" else "income"
 
-        // State variables needed for the date picker
-
         // Format the date for API - convert from "2025/12/31(Wed)" to "2025-12-31"
         val formattedDate = selectedDate
             .substringBefore("(")
             .replace("/", "-")
 
-        // Current timestamp for createdAt
-        val createdAt = java.time.OffsetDateTime.now().toString()
 
         // Call the ViewModel to add the transaction
         incomeAndExpenseViewModel.addTransaction(
@@ -205,8 +202,6 @@ fun IncomeAndExpenseScreen(
             amount = amountValue,
             date = formattedDate,
         )
-        navController.navigate(Screens.OverviewScreen.route)
-
     }
 
     Scaffold(
@@ -221,7 +216,6 @@ fun IncomeAndExpenseScreen(
             })
         }
     ) { innerPadding ->
-        // Main content with white background
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -249,14 +243,13 @@ fun IncomeAndExpenseScreen(
                 color = Color.Black
             )
 
-            // Amount and currency section - place this right below the HorizontalDivider
+            // Amount and currency section
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 4.dp), // Reduced vertical padding to move closer to divider
+                    .padding(horizontal = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Left section - Amount with currency symbol
                 Row(
                     modifier = Modifier
                         .weight(1f),
@@ -264,7 +257,7 @@ fun IncomeAndExpenseScreen(
                 ) {
                     Text(
                         text = currencySymbol,
-                        fontSize = 22.sp, // Increased font size
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color.Black
                     )
@@ -273,7 +266,7 @@ fun IncomeAndExpenseScreen(
 
                     Text(
                         text = amount.ifEmpty { "0" },
-                        fontSize = 22.sp, // Increased font size
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color.Black
                     )
@@ -282,8 +275,8 @@ fun IncomeAndExpenseScreen(
                 Box(
                     modifier = Modifier
                         .width(1.dp)
-                        .height(28.dp) // Increased height
-                        .background(Color(0xFFE0E0E0)) // Light gray divider
+                        .height(28.dp)
+                        .background(Color(0xFFE0E0E0))
                 )
 
                 // Currency dropdown
@@ -297,7 +290,7 @@ fun IncomeAndExpenseScreen(
                 ) {
                     Text(
                         text = selectedCurrency,
-                        fontSize = 20.sp, // Increased font size
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
@@ -307,7 +300,7 @@ fun IncomeAndExpenseScreen(
                     Icon(
                         imageVector = Icons.Default.ArrowDropDown,
                         contentDescription = "Select Currency",
-                        modifier = Modifier.size(28.dp), // Increased icon size
+                        modifier = Modifier.size(28.dp),
                         tint = Color.Black
                     )
                 }
@@ -322,7 +315,7 @@ fun IncomeAndExpenseScreen(
                                 text = {
                                     Text(
                                         text = currency,
-                                        fontSize = 18.sp // Larger dropdown text
+                                        fontSize = 18.sp
                                     )
                                 },
                                 onClick = {
@@ -341,14 +334,13 @@ fun IncomeAndExpenseScreen(
                 thickness = 2.dp,
                 color = Color.Black
             )
-            // In the IncomeA
-            // ndExpenseScreen, modify the Box that contains the calculator
+            //modify the Box that contains the calculator
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight()
-                    .weight(1f) // Take all remaining space
-                    .background(Color(0xFFF0E6FF)) // Purple background for the entire area
+                    .weight(1f)
+                    .background(Color(0xFFF0E6FF))
             ) {
 
                 // Calculator content
@@ -358,7 +350,7 @@ fun IncomeAndExpenseScreen(
                     verticalArrangement = Arrangement.SpaceBetween
 
                 ) {
-                    // State for date picker
+                    //date picker
                     DatePickerRow(
                         selectedDate = selectedDate,
                         onDateSelected = { newDate ->
@@ -368,7 +360,7 @@ fun IncomeAndExpenseScreen(
 
                     Spacer(modifier = Modifier.height(40.dp))
 
-                    // Calculator grid - without passing onDateSelected
+                    // Calculator grid
                     KeypadGrid(
                         onAmountChanged = { newAmount ->
                             amount = newAmount
@@ -376,6 +368,7 @@ fun IncomeAndExpenseScreen(
                         onOkPressed = {
                             // Call the function to add transaction when OK is pressed
                             addTransaction()
+
                         },
                         key = selectedCategory
                     )

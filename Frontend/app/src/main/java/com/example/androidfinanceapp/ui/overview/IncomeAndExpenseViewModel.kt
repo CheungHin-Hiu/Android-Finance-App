@@ -35,9 +35,7 @@ class IncomeAndExpenseViewModel(private val transactionRepository: TransactionRe
             try {
                 val response = transactionRepository.addTransaction(token,type,categoryType,currencyType,amount,date)
                 if(response.isSuccessful){
-                    response.body()?.let {
-                        addTransactionState = AddTransactionState.Success
-                    }
+                    addTransactionState = AddTransactionState.Success
                 }else{
                     addTransactionState = AddTransactionState.Error("Add transaction failed: ${response.message()}" )
                 }
