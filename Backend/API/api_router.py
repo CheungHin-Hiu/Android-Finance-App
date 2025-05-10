@@ -3,11 +3,11 @@ import fastapi
 from API.model.GET_finance_data import RequestFinanceData
 from API.model.GET_login_request import LoginRequest
 from API.model.GET_register_request import RegisterRequest
-from API.model.GET_transactions import TransactionsGetRequest
+# from API.model.GET_transactions import TransactionsGetRequest
 # from API.model.POST_assest_by_user import tra
 from API.model.POST_assest_by_user import InsertAssetRequest
 from API.model.PUT_asset_update import UpdateAssetRequest
-from API.model.DELETE_asset_by_item import DeleteAssetRequest
+# from API.model.DELETE_asset_by_item import DeleteAssetRequest
 from API.model.POST_transaction_data import TransactionPostRequest
 # from API.model.POST_transaction_item import TransactionPostRequest
 from API.model.POST_target import TargetPostRequest
@@ -56,7 +56,10 @@ class APIRouteDefintion:
     # endpoint: _____/login, method: GET
     async def _get_login_operation(self, request_entity: LoginRequest):
         login_payload = request_entity.model_dump()
-        return await self.login_controller.verify_credential(login_payload)
+        login_response = await self.login_controller.verify_credential(login_payload)
+        if login_response is None or login_response['status'] != 200:
+            raise HTTPException(status_code=login_response['status'], detail=login_response['error'])
+        return login_response
 
     # endpoint: _____/register, method: GET
     async def _get_register_operation(self, request_entity: RegisterRequest ):
