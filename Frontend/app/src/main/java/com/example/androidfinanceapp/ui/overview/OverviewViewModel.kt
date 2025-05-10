@@ -36,7 +36,7 @@ class OverviewViewModel(private val transactionRepository: TransactionRepository
                         getTransactionState = GetTransactionState.Success(it)
                     }
                 }else{
-                    getTransactionState = GetTransactionState.Error("Load transaction failed: ${response.message()}" )
+                    getTransactionState = GetTransactionState.Error("Load transaction failed: ${response.message()}, you may add some transactions before loading" )
                 }
             }catch (e: Exception){
                 getTransactionState = GetTransactionState.Error("An error occurred: ${e.message}" )

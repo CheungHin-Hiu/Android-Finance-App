@@ -37,6 +37,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.androidfinanceapp.R
 import com.example.androidfinanceapp.data.DataStoreManager
+import com.example.androidfinanceapp.ui.Screens
 import com.example.androidfinanceapp.ui.common.CategoryGrid
 import com.example.androidfinanceapp.ui.common.CategoryItem
 import com.example.androidfinanceapp.ui.common.DatePickerRow
@@ -139,9 +140,7 @@ fun IncomeAndExpenseScreen(
     LaunchedEffect(transactionState) {
         when (transactionState) {
             is AddTransactionState.Success -> {
-                // Reset state and navigate back to overview screen
-                incomeAndExpenseViewModel.setAddIdle()
-                navController.navigateUp()
+                navController.navigate(Screens.OverviewScreen.route)
             }
             is AddTransactionState.Error -> {
                 errorMessage = transactionState.message
@@ -206,6 +205,7 @@ fun IncomeAndExpenseScreen(
             amount = amountValue,
             date = formattedDate,
         )
+        navController.navigate(Screens.OverviewScreen.route)
 
     }
 

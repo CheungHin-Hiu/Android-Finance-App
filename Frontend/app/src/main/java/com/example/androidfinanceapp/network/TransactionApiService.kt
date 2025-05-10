@@ -9,13 +9,13 @@ import retrofit2.http.Path
 
 interface TransactionApiService {
     //get all transactions
-    @GET("/transactions/{token}")
+    @GET("/transaction/{token}")
     suspend fun getTransactions(
         @Path("token", encoded = true) token: String,
     ): Response<TransactionsResponse>
 
     //add transactions to db
-    @POST("/transactions/{token}")
+    @POST("/transaction/{token}")
     suspend fun addTransaction(
         @Path("token", encoded = true) token: String,
         @Body request: AddTransactionRequest
@@ -44,6 +44,11 @@ data class Transaction(
 //adding the transaction and its category
 @Serializable
 data class AddTransactionRequest(
+    @SerialName("transaction_item") val transactionItem: TransactionItemData
+)
+
+@Serializable
+data class TransactionItemData(
     @SerialName("type") val type: String,
     @SerialName("category_type") val categoryType: String,
     @SerialName("currency_type") val currencyType: String,

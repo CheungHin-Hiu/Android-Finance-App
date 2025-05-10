@@ -1,7 +1,9 @@
 package com.example.androidfinanceapp.data
 import com.example.androidfinanceapp.network.AddTransactionRequest
 import com.example.androidfinanceapp.network.TransactionApiService
+import com.example.androidfinanceapp.network.TransactionItemData
 import com.example.androidfinanceapp.network.TransactionsResponse
+import com.example.androidfinanceapp.ui.overview.TransactionItem
 import retrofit2.Response
 
 interface TransactionRepository {
@@ -42,11 +44,12 @@ class NetworkTransactionRepository(
         transactionApiService.addTransaction(
             token=token,
             request = AddTransactionRequest(
-                type = type,
-                categoryType = categoryType,
-                currencyType = currencyType,
-                amount = amount,
-                date = date,
+                TransactionItemData(type = type,
+                    categoryType = categoryType,
+                    currencyType = currencyType,
+                    amount = amount,
+                    date = date,)
+
             )
         )
 }
