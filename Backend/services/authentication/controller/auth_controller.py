@@ -41,7 +41,8 @@ class LoginController(AuthController):
     
             return {'status':400, 'error': 'Invalid Login Credential'}
 
-       
+        if not user_information:
+            return {'status':400, 'error': 'Invalid Login Credential'}
 
         try:         
             user_id = user_information.get('_id')

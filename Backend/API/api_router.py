@@ -3,11 +3,11 @@ import fastapi
 from API.model.GET_finance_data import RequestFinanceData
 from API.model.GET_login_request import LoginRequest
 from API.model.GET_register_request import RegisterRequest
-from API.model.GET_transactions import TransactionsGetRequest
+# from API.model.GET_transactions import TransactionsGetRequest
 # from API.model.POST_assest_by_user import tra
 from API.model.POST_assest_by_user import InsertAssetRequest
 from API.model.PUT_asset_update import UpdateAssetRequest
-from API.model.DELETE_asset_by_item import DeleteAssetRequest
+# from API.model.DELETE_asset_by_item import DeleteAssetRequest
 from API.model.POST_transaction_data import TransactionPostRequest
 # from API.model.POST_transaction_item import TransactionPostRequest
 from API.model.POST_target import TargetPostRequest
@@ -56,7 +56,10 @@ class APIRouteDefintion:
     # endpoint: _____/login, method: GET
     async def _get_login_operation(self, request_entity: LoginRequest):
         login_payload = request_entity.model_dump()
-        return await self.login_controller.verify_credential(login_payload)
+        login_response = await self.login_controller.verify_credential(login_payload)
+        if login_response is None or login_response['status'] != 200:
+            raise HTTPException(status_code=login_response['status'], detail=login_response['error'])
+        return login_response
 
     # endpoint: _____/register, method: GET
     async def _get_register_operation(self, request_entity: RegisterRequest ):
@@ -70,16 +73,15 @@ class APIRouteDefintion:
         finance_data_response = await get_finance_data(
             currencies=requested_items['currency'], stocks=requested_items['stock'], cryptos=requested_items['crypto']
         )
+        if finance_data_response is None:
+            raise HTTPException(status_code=404, detail="Finance Data Not Found")
         return finance_data_response
     
     # endpoint: _____/finance/USD{to_currency}, method: GET
     async def _get_usd_conversion_rate(self, to_currency: str):
-        finance_data = await get_finance_data()
-        conversion_rates = finance_data["currency"]
-        # check if conversion rate exists
-        if f"USD{to_currency.upper()}=X" not in conversion_rates:
-            raise HTTPException(status_code=404, detail="Conversion rate not found")
-        conversion_rate = conversion_rates[f"USD{to_currency.upper()}=X"]
+        conversion_rate = await currency_conversion("USD", to_currency, 1)
+        if conversion_rate is None:
+            raise HTTPException(status_code=404, detail="Currency Not Found")
         return conversion_rate
 
 
@@ -123,23 +125,23 @@ class APIRouteDefintion:
 
     async def _get_assest_by_user(self, token: str,currency:str):
         if not token:
-            return {"status": 400}
+            raise HTTPException(status_code=400, detail='Invalid Token')
         return await self.assets_controller.get_asset(token, currency)
     
     async def _add_assest_by_user(self, token:str, request_entity: InsertAssetRequest):
         if not token:
-            return {"status": 400}
+            raise HTTPException(status_code=400, detail='Invalid Token')
         assets = request_entity.model_dump()
         return await self.assets_controller.add_asset(token, assets)
     
     async def _modify_assest_by_item(self, token:str, request_entity: UpdateAssetRequest):
         if not token:
-            return {"status": 400}
+            raise HTTPException(status_code=400, detail='Invalid Token')
     
         return await self.assets_controller.modify_asset(token, request_entity)
     
     async def _delete_asset_by_item(self, token:str, asset_id: str ):
         if not token:
-            return {"status": 400}
+            raise HTTPException(status_code=400, detail='Invalid Token')
         
         return await self.assets_controller.del_asset(token, asset_id)
