@@ -89,6 +89,6 @@ class AssetController:
         )
 
         if result.deleted_count == 0:
-            raise  {{"status": 200}}
+            return {"status": 200}
         
-        return {{"status": 200, "message": "Asset Deleted"}}
+        return {"status": 200, "message": "Asset Deleted"}

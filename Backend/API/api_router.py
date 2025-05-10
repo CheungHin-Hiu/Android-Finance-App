@@ -44,7 +44,7 @@ class APIRouteDefintion:
         self.router.add_api_route("/asset/{token}/{currency}", self._get_assest_by_user, methods=["GET"])
         self.router.add_api_route("/asset/{token}", self._add_assest_by_user, methods=["POST"])
         self.router.add_api_route("/asset/{token}", self._modify_assest_by_item, methods=["PUT"])
-        self.router.add_api_route("/asset/{token}", self._delete_asset_by_item, methods=["DELETE"])
+        self.router.add_api_route("/asset/{token}/{asset_id}", self._delete_asset_by_item, methods=["DELETE"])
         
         self.router.add_api_route("/target", self._insert_target, methods=["POST"])
         self.router.add_api_route("/target/{token}/{currency}", self._get_targets_by_user, methods=["GET"])
@@ -76,7 +76,6 @@ class APIRouteDefintion:
     async def _post_transaction_data(self, token, request_entity: TransactionPostRequest ):
         transaction_item = request_entity.model_dump()
         return await self.transaction_controller.insert_transaction(token, transaction_item)
-
 
 
     # endpoint: _____/target, method: POST
@@ -123,8 +122,8 @@ class APIRouteDefintion:
     
         return await self.assets_controller.modify_asset(token, request_entity)
     
-    async def _delete_asset_by_item(self, token:str, request_entity:DeleteAssetRequest ):
+    async def _delete_asset_by_item(self, token:str, asset_id: str ):
         if not token:
             return {"status": 400}
-        asset_id = request_entity.model_dump().get("id")
+        
         return await self.assets_controller.del_asset(token, asset_id)
