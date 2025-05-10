@@ -1,6 +1,9 @@
 from pymongo.mongo_client import MongoClient
 from datetime import datetime, timezone
 from ..authentication.token.access_token import JWTGenerator
+from ..finance.currency_conversion import currency_conversion
+
+
 class TransactionController():
     
     def __init__(self, database_entity:MongoClient) -> None:
@@ -17,7 +20,7 @@ class TransactionController():
         return {"status": 200, "transaction_id": str(result.inserted_id)}
     
 
-    async def get_transactions_by_user(self, token: str) -> list[dict]:
+    async def get_transactions_by_user(self, token: str, target_currency) -> list[dict]:
 
         user_payload = self.token_generator.verify_jwt_token(token)
         user_id = str(user_payload['user_id'])
@@ -28,6 +31,8 @@ class TransactionController():
             transaction["transaction_id"] = str(transaction["_id"])
             transaction.pop("_id", None)
             transaction.pop("user_id", None)
+
+            transaction["converted_amount"] = float(await currency_conversion(transaction["currency_type"].upper(), target_currency, transaction["amount"]))
             if "datetime" in transaction:
                 transaction["datetime"] = transaction["datetime"].isoformat()
 

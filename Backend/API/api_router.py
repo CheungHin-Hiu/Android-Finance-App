@@ -38,7 +38,7 @@ class APIRouteDefintion:
         self.router.add_api_route("/register", self._get_register_operation, methods=["POST"])
         self.router.add_api_route("/finance", self._get_finance_data_operation, methods=["POST"])
 
-        self.router.add_api_route("/transaction/{token}",  self._get_transactions_by_user, methods=["GET"])
+        self.router.add_api_route("/transaction/{token}/{currency}",  self._get_transactions_by_user, methods=["GET"])
         self.router.add_api_route("/transaction/{token}",  self._post_transaction_data, methods=["POST"])
 
         self.router.add_api_route("/asset/{token}/{currency}", self._get_assest_by_user, methods=["GET"])
@@ -69,9 +69,8 @@ class APIRouteDefintion:
         return finance_data_response   
 
     # endpoint: _____/transaction, method: GET
-    async def _get_transactions_by_user(self, token):
-      
-        return await self.transaction_controller.get_transactions_by_user(token)
+    async def _get_transactions_by_user(self, token:str, currency: str):
+        return await self.transaction_controller.get_transactions_by_user(token, currency)
        
     # endpoint: _____/transaction, method: POST
     async def _post_transaction_data(self, token, request_entity: TransactionPostRequest ):
