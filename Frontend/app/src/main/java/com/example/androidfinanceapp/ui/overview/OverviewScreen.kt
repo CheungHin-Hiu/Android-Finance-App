@@ -1,6 +1,7 @@
 package com.example.androidfinanceapp.ui.overview
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -70,6 +71,7 @@ import com.example.androidfinanceapp.network.Transaction
 import com.example.androidfinanceapp.ui.Screens
 import com.example.androidfinanceapp.ui.common.AppNavigationDrawer
 import com.example.androidfinanceapp.ui.common.ScreenTopBar
+import org.intellij.lang.annotations.JdkConstants
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -85,23 +87,12 @@ fun OverviewScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val getTransactionState = overviewViewModel.getTransactionState
+    val flexibleDateFormatter = DateTimeFormatter.ofPattern("[yyyy-M-d][yyyy-MM-dd]")
 
 
     // Default month
     var selectedMonth by remember { mutableStateOf(2) }
     LaunchedEffect(key1 = selectedMonth, key2 = token) {
-        // Calculate date range based on selected month
-        overviewViewModel.setGetIdle()
-        val now = LocalDate.now()
-        val month = when (selectedMonth) {
-            0 -> now.minusMonths(2) // Two months ago
-            1 -> now.minusMonths(1) // Last month
-            else -> now             // Current month
-        }
-        val startDate = month.withDayOfMonth(1).format(DateTimeFormatter.ISO_DATE)
-        val endDate = month.withDayOfMonth(month.lengthOfMonth()).format(DateTimeFormatter.ISO_DATE)
-
-        // Fetch transactions for the selected month
         overviewViewModel.getTransactions(token.toString())
     }
 
@@ -135,7 +126,7 @@ fun OverviewScreen(
                             shape = CircleShape,
                             spotColor = Color.Black.copy(alpha = 0.3f)
                         )
-                        .clip(CircleShape)  // Ensure the touch area is circular
+                        .clip(CircleShape)
                         .pointerInput(Unit) {
                             detectTapGestures(
                                 onPress = {
@@ -160,7 +151,7 @@ fun OverviewScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
+                    .padding(innerPadding),
             ) {
                 // Month selector tabs
                 MonthSelectorTabs(
@@ -173,7 +164,7 @@ fun OverviewScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(315.dp)
+                        .height(315.dp),
                 ) {
                     when (getTransactionState) {
                         // When idle, show a loading indicator
@@ -186,46 +177,34 @@ fun OverviewScreen(
 
                         // When successful, display charts
                         is GetTransactionState.Success -> {
-                            val transactionData = getTransactionState.transactionsResponse.transactions
-                            if (transactionData.isEmpty()) {
-                                // Show message when no transactions found
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "No transactions found for this period",
-                                        color = Color.Gray,
-                                        fontSize = 16.sp
-                                    )
-                                }
+                            val transactionData = getTransactionState.transactionsResponse
 
-                            } else {
-                                val now = LocalDate.now()
-                                val month = when (selectedMonth) {
-                                    0 -> now.minusMonths(2) // Two months ago
-                                    1 -> now.minusMonths(1) // Last month
-                                    else -> now             // Current month
-                                }
-                                val startDate = month.withDayOfMonth(1)
-                                val endDate = month.withDayOfMonth(month.lengthOfMonth())
-
-                                // Filter transactions that fall within the selected month
-                                val filteredTransactions = transactionData.filter { transaction ->
-                                    try {
-                                        // Parse the transaction date (assuming ISO format: YYYY-MM-DD)
-                                        val transactionDate = LocalDate.parse(transaction.date)
-                                        // Check if it falls within the selected month range
-                                        (transactionDate.isEqual(startDate) || transactionDate.isAfter(startDate)) &&
-                                                (transactionDate.isEqual(endDate) || transactionDate.isBefore(endDate))
-                                    } catch (e: Exception) {
-                                        // If date parsing fails, exclude the transaction
-                                        false
-                                    }
-                                }
-                                // Display transaction charts
-                                TransactionCharts(transactions = filteredTransactions)
+                            val now = LocalDate.now()
+                            val month = when (selectedMonth) {
+                                0 -> now.minusMonths(2) // Two months ago
+                                1 -> now.minusMonths(1) // Last month
+                                else -> now             // Current month
                             }
+                            val startDate = month.withDayOfMonth(1)
+                            val endDate = month.withDayOfMonth(month.lengthOfMonth())
+
+                            // Filter transactions that fall within the selected month
+                            val filteredTransactions = transactionData.filter { transaction ->
+                                try {
+                                    // Parse the transaction date with the flexible formatter
+                                    val transactionDate = LocalDate.parse(transaction.date, flexibleDateFormatter)
+                                    // Check if it falls within the selected month range
+                                    (transactionDate.isEqual(startDate) || transactionDate.isAfter(startDate)) &&
+                                            (transactionDate.isEqual(endDate) || transactionDate.isBefore(endDate))
+                                } catch (e: Exception) {
+                                    // If date parsing fails, exclude the transaction and log the error
+                                    Log.e("DateParse", "Error parsing date: ${transaction.date}", e)
+                                    false
+                                }
+                            }
+                            // Display transaction charts
+                            TransactionCharts(transactions = filteredTransactions)
+
                         }
 
                         // When error, show error message with retry option
@@ -282,9 +261,7 @@ fun OverviewScreen(
                                 }
                             }
                         }
-                }
-                    // For development with temp data, uncomment this:
-                    /*TransactionCharts(transactions = transactions)*/
+                    }
                 }
 
 
@@ -314,12 +291,12 @@ fun OverviewScreen(
 
                         // When successful, display the transaction list
                         is GetTransactionState.Success -> {
-                            val transactions = getTransactionState.transactionsResponse.transactions
+                            val transactions = getTransactionState.transactionsResponse
 
 
                                 // Display transactions in a LazyColumn
                             LazyColumn(
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier.fillMaxSize(),
                             ) {
                                 // Calculate date range based on selected month
                                 val now = LocalDate.now()
@@ -334,13 +311,14 @@ fun OverviewScreen(
                                 // Filter transactions that fall within the selected month
                                 val filteredTransactions = transactions.filter { transaction ->
                                     try {
-                                        // Parse the transaction date (assuming ISO format: YYYY-MM-DD)
-                                        val transactionDate = LocalDate.parse(transaction.date)
+                                        // Parse the transaction date with the flexible formatter
+                                        val transactionDate = LocalDate.parse(transaction.date, flexibleDateFormatter)
                                         // Check if it falls within the selected month range
                                         (transactionDate.isEqual(startDate) || transactionDate.isAfter(startDate)) &&
                                                 (transactionDate.isEqual(endDate) || transactionDate.isBefore(endDate))
                                     } catch (e: Exception) {
-                                        // If date parsing fails, exclude the transaction
+                                        // If date parsing fails, exclude the transaction and log the error
+                                        Log.e("DateParse", "Error parsing date: ${transaction.date}", e)
                                         false
                                     }
                                 }
@@ -348,8 +326,10 @@ fun OverviewScreen(
                                 if (filteredTransactions.isEmpty()) {
                                     item {
                                         Box(
-                                            modifier = Modifier.fillMaxWidth().padding(16.dp),
-                                            contentAlignment = Alignment.Center
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(top = 200.dp),
+                                            contentAlignment = Alignment.Center,
                                         ) {
                                             Text(
                                                 text = "No transactions for this period",
@@ -377,7 +357,8 @@ fun OverviewScreen(
                         is GetTransactionState.Error -> {
                             val errorMessage = getTransactionState.message
                             Box(
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier
+                                    .fillMaxSize()
                                     .padding(16.dp),
                                 contentAlignment = Alignment.Center,
 
@@ -429,23 +410,6 @@ fun OverviewScreen(
                         }
                     }
                 }
-
-                // If using temp data for development, uncomment this:
-
-                /*LazyColumn(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(transactions) { transaction ->
-                        TransactionItem(
-                            type = transaction.type,
-                            categoryType = transaction.categoryType,
-                            currencyType = transaction.currencyType,
-                            amount = transaction.amount,
-                            date = transaction.date,
-                            createdAt = transaction.createdAt
-                        )
-                    }
-                }*/
             }
         }
     }
@@ -457,7 +421,7 @@ fun MonthSelectorTabs(
     onMonthSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Get current date to calculate month names dynamically
+    // Get current date to calculate month names
     val currentDate = remember { LocalDate.now() }
 
     // Create a list of the last 3 months (current and 2 previous)
@@ -475,8 +439,8 @@ fun MonthSelectorTabs(
     TabRow(
         selectedTabIndex = selectedMonth,
         modifier = modifier.fillMaxWidth(),
-        containerColor = Color(0xFFF8F0FF), // Light purple background from your design
-        contentColor = Color(0xFF6200EE), // Purple for selected tab
+        containerColor = Color(0xFFF8F0FF),
+        contentColor = Color(0xFF6200EE),
         indicator = { tabPositions ->
             // Only show indicator for selected tab
             if (selectedMonth < tabPositions.size) {
@@ -517,18 +481,18 @@ fun TransactionItem(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White) // Pure white background
+            .background(Color.White)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp), // Increased vertical padding
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Category Icon - already includes the colored circle
+            // Category Icon
             Box(
                 modifier = Modifier
-                    .size(64.dp), // Significantly larger icon container
+                    .size(64.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
@@ -551,7 +515,7 @@ fun TransactionItem(
                         else -> painterResource(R.drawable.salary_circle)
                     },
                     contentDescription = categoryType,
-                    modifier = Modifier.size(64.dp) // Full-size image
+                    modifier = Modifier.size(64.dp)
                 )
             }
 
@@ -564,18 +528,18 @@ fun TransactionItem(
                 Text(
                     text = categoryType,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 22.sp, // Much larger font size
+                    fontSize = 22.sp,
                     color = Color.Black
                 )
                 Text(
                     text = date,
                     color = Color.Gray,
-                    fontSize = 16.sp, // Increased font size for date
+                    fontSize = 16.sp,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
 
-            // Amount - positive or negative with better formatting
+            // Amount
             Text(
                 text = if (type.contains("Expense", ignoreCase = true))
                     "-${amount} $currencyType"
@@ -845,20 +809,18 @@ data class ChartItem(
 
 fun getCategoryColor(category: String): Color {
     return when {
-        category.contains("Entertainment", ignoreCase = true) -> Color(0xFFFF7043) // Deep Orange (prominent in your chart)
-        category.contains("Networking", ignoreCase = true) -> Color(0xFF26C6DA) // Cyan
-        category.contains("Medicine", ignoreCase = true) -> Color(0xFFAB47BC) // Purple
-        category.contains("Gift", ignoreCase = true) -> Color(0xFF9575CD) // Light Purple
-        category.contains("Transport", ignoreCase = true) -> Color(0xFFFFB300) // Amber
-        category.contains("Shopping", ignoreCase = true) -> Color(0xFFEF5350) // Red-ish
-
-        // Keep your other existing categories
-        category.contains("Food", ignoreCase = true) -> Color(0xFFFFCA28) // Yellow
-        category.contains("Rent", ignoreCase = true) -> Color(0xFF42A5F5) // Blue
-        category.contains("Salary", ignoreCase = true) -> Color(0xFF66BB6A) // Green
-        category.contains("Interest", ignoreCase = true) -> Color(0xFF26A69A) // Teal
-        category.contains("Dividend", ignoreCase = true) -> Color(0xFF4DB6AC) // Teal variant
-        category.contains("Loyalty", ignoreCase = true) -> Color(0xFF7986CB) // Indigo
+        category.contains("Entertainment", ignoreCase = true) -> Color(0xFFFF7043)
+        category.contains("Networking", ignoreCase = true) -> Color(0xFF26C6DA)
+        category.contains("Medicine", ignoreCase = true) -> Color(0xFFAB47BC)
+        category.contains("Gift", ignoreCase = true) -> Color(0xFF9575CD)
+        category.contains("Transport", ignoreCase = true) -> Color(0xFFFFB300)
+        category.contains("Shopping", ignoreCase = true) -> Color(0xFFEF5350)
+        category.contains("Food", ignoreCase = true) -> Color(0xFFFFCA28)
+        category.contains("Rent", ignoreCase = true) -> Color(0xFF42A5F5)
+        category.contains("Salary", ignoreCase = true) -> Color(0xFF66BB6A)
+        category.contains("Interest", ignoreCase = true) -> Color(0xFF26A69A)
+        category.contains("Dividend", ignoreCase = true) -> Color(0xFF4DB6AC)
+        category.contains("Loyalty", ignoreCase = true) -> Color(0xFF7986CB)
 
         // Other/default case
         else -> Color(0xFF78909C) // Gray

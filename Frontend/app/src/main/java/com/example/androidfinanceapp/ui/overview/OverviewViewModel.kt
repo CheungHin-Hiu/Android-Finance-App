@@ -12,12 +12,13 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.androidfinanceapp.TopFinanceApplication
 import com.example.androidfinanceapp.data.TransactionRepository
-import com.example.androidfinanceapp.network.TransactionsResponse
+import com.example.androidfinanceapp.network.Transaction
 import kotlinx.coroutines.launch
+import retrofit2.Response
 
 sealed interface GetTransactionState{
     object Idle : GetTransactionState
-    data class Success(val transactionsResponse : TransactionsResponse) : GetTransactionState
+    data class Success(val transactionsResponse :List<Transaction>) : GetTransactionState
     data class Error(val message: String):GetTransactionState
 }
 

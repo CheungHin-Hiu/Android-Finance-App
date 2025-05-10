@@ -86,7 +86,6 @@ fun KeypadGrid(
             "=" -> {
                 // Handle calculation using the current expression
                 try {
-                    // This is a simple approach - in a real app you'd use a proper expression parser
                     val result = evaluateExpression(amountValue)
                     amountValue = result.toString()
                     // If result is a whole number, remove the decimal part
@@ -95,8 +94,7 @@ fun KeypadGrid(
                     }
                     onAmountChanged(amountValue)
                 } catch (e: Exception) {
-                    // Handle calculation errors - could show an error message
-                    // For now, just keep the current value
+
                 }
             }
             else -> {
@@ -191,7 +189,6 @@ fun KeypadGrid(
             ) { handleButtonClick("OK") }
         }
 
-        // Add bottom spacing if needed
         Spacer(modifier = Modifier.height(24.dp))
     }
 }
@@ -234,7 +231,7 @@ fun evaluateSimpleExpression(expr: String): Double {
         }
     }
 
-    // Now process addition and subtraction
+    //process addition and subtraction
     var result = addSubtractTokens[0].toDoubleOrNull() ?: 0.0
 
     for (i in 0 until operators.size) {
