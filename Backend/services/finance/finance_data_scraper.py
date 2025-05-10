@@ -118,6 +118,9 @@ async def get_finance_data(
     stock_response = await _get_batch_yahoo_stock_data(stocks)
     crypto_response = await _get_batch_yahoo_stock_data(cryptos)
 
+    if currency_response is None:
+        return None
+
     result = {
         "timeRetrieved": str(datetime.now(timezone.utc)),
         "currency": currency_response,

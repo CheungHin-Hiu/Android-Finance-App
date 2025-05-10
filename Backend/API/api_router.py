@@ -70,16 +70,15 @@ class APIRouteDefintion:
         finance_data_response = await get_finance_data(
             currencies=requested_items['currency'], stocks=requested_items['stock'], cryptos=requested_items['crypto']
         )
+        if finance_data_response is None:
+            raise HTTPException(status_code=404, detail="Finance Data Not Found")
         return finance_data_response
     
     # endpoint: _____/finance/USD{to_currency}, method: GET
     async def _get_usd_conversion_rate(self, to_currency: str):
-        finance_data = await get_finance_data()
-        conversion_rates = finance_data["currency"]
-        # check if conversion rate exists
-        if f"USD{to_currency.upper()}=X" not in conversion_rates:
-            raise HTTPException(status_code=404, detail="Conversion rate not found")
-        conversion_rate = conversion_rates[f"USD{to_currency.upper()}=X"]
+        conversion_rate = await currency_conversion("USD", to_currency, 1)
+        if conversion_rate is None:
+            raise HTTPException(status_code=404, detail="Currency Not Found")
         return conversion_rate
 
 
