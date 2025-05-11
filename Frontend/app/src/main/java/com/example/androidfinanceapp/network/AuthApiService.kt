@@ -13,9 +13,6 @@ interface AuthApiService {
 
     @POST("/register")
     suspend fun signup(@Body request: SignupRequest): Response<SignupResponse>
-
-    @POST("/refresh")
-    suspend fun refreshToken(@Body request: RefreshRequest): Response<RefreshResponse>
 }
 
 // Login response and request dataclass
@@ -46,13 +43,3 @@ data class SignupResponse(
     @SerialName("token") val token: String,
 )
 
-// Refresh request and response
-@Serializable
-data class RefreshRequest(
-    @SerialName("refresh_token") val refreshToken: String
-)
-
-@Serializable
-data class RefreshResponse(
-    @SerialName("new_token") val newToken: String
-)

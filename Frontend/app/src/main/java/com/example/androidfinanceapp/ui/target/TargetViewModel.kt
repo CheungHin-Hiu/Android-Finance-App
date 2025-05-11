@@ -1,6 +1,5 @@
 package com.example.androidfinanceapp.ui.target
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -18,7 +17,6 @@ import com.example.androidfinanceapp.network.Transaction
 import kotlinx.coroutines.launch
 
 sealed interface TargetState {
-    object Loading : TargetState
     object Idle : TargetState
     object SuccessFetching : TargetState
     object SuccessAdding : TargetState
@@ -59,7 +57,6 @@ class TargetViewModel(private val targetRepository: TargetRepository) : ViewMode
             }
         } catch (e: Exception) {
             targetState = TargetState.Error("An error occurred: ${e.message}")
-            Log.e("Error while fetching user target", e.message.toString())
         }
     }
 
@@ -87,7 +84,6 @@ class TargetViewModel(private val targetRepository: TargetRepository) : ViewMode
             }
         } catch (e: Exception) {
             targetState = TargetState.Error("An error occurred: ${e.message}")
-            Log.e("Login error", e.message.toString())
         }
     }
 
@@ -103,7 +99,6 @@ class TargetViewModel(private val targetRepository: TargetRepository) : ViewMode
             }
         } catch (e: Exception) {
             targetState = TargetState.Error("An error occurred: ${e.message}")
-            Log.e("Login error", e.message.toString())
         }
     }
 
@@ -121,7 +116,6 @@ class TargetViewModel(private val targetRepository: TargetRepository) : ViewMode
                 }
             } catch (e: Exception) {
                 targetState = TargetState.Error("An error occurred: ${e.message}")
-                Log.e("Error while fetching user target", e.message.toString())
             }
         }
     }

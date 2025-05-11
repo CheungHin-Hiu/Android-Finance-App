@@ -116,8 +116,8 @@ fun AssetStatisticsScreen(
 
     LaunchedEffect(Unit) {
         assetViewModel.getAssetTotalOfMonth(username)
-        assetViewModel.getAsset(username, token, currencySelected)
         assetViewModel.getCurrencyExchangeRate(currencySelected)
+        assetViewModel.getAsset(username, token, currencySelected)
     }
 
     AppNavigationDrawer(
@@ -231,7 +231,7 @@ fun AssetStatisticsScreen(
                 )
 
                 if (assetViewModel.pieChartData.value.isNotEmpty()) {
-                    AssetStatisticDonutChart(assetViewModel.pieChartData.value)
+                    AssetStatisticDonutChart(assetViewModel.pieChartData.value, assetViewModel.exchangeRate.value)
                 } else {
                     Text("No data available")
                 }
@@ -483,7 +483,8 @@ private fun standardizeNumber(values: List<Float>): MutableList<Float> {
 
 @Composable
 fun AssetStatisticDonutChart(
-    pieCharData: Map<String, Float>
+    pieCharData: Map<String, Float>,
+    currencyExchangeRate: Float
 ) {
 
     // State to control the visibility of the dialog
@@ -515,12 +516,10 @@ fun AssetStatisticDonutChart(
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Legend/Table
         Column(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            // Split assets into rows of maximum 4 items
             assetTypes.chunked(4).forEach { rowAssets ->
                 Row(
                     modifier = Modifier
@@ -584,7 +583,9 @@ fun AssetStatisticDonutChart(
                 onDismissRequest = { showDialog = false },
                 title = { Text(text = "Asset Details") },
                 text = {
-                    Text(text = "Name: ${clickedSlice?.label}\nValue: ${clickedSlice?.value}")
+                    Text(text = "Name: ${clickedSlice?.label}\nValue: ${clickedSlice?.value?.times(
+                        currencyExchangeRate
+                    ) ?: 0}")
                 },
                 confirmButton = {
                     TextButton(onClick = { showDialog = false }) {

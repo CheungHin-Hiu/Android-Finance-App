@@ -61,7 +61,6 @@ val assetCategories =
         CategoryItem(5, R.drawable.real_estate, "Real Estate"),
         CategoryItem(6, R.drawable.other_asset, "Other")
     )
-
 @Composable
 fun AddAssetTab(
     token: String,

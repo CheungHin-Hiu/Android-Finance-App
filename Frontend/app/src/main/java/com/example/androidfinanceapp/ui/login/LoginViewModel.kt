@@ -39,7 +39,6 @@ class LoginViewModel(private val authRepository: AuthRepository): ViewModel() {
                 }
             } catch (e: Exception) {
                 loginUiState = LoginUiState.Error("An error occurred: ${e.message}" )
-                Log.e("Login error", "" + e.message)
             }
         }
     }
