@@ -80,4 +80,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     testImplementation(kotlin("test"))
+    testImplementation ("org.mockito:mockito-core:5.4.0")// Use latest version
+    testImplementation ("org.mockito.kotlin:mockito-kotlin:5.1.0") // For Kotlin support
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    androidTestImplementation("org.mockito:mockito-core:5.4.0")
+    androidTestImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
 }
