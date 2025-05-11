@@ -41,7 +41,6 @@ class IncomeAndExpenseViewModel(private val transactionRepository: TransactionRe
                 }
             }catch (e: Exception){
                 addTransactionState = AddTransactionState.Error("An error occurred: ${e.message}" )
-                Log.e("Add transaction error", "" + e.message)
             }
         }
     }

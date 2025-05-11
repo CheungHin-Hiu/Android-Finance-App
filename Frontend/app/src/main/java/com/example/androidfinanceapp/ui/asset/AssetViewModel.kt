@@ -1,8 +1,6 @@
 package com.example.androidfinanceapp.ui.asset
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -70,7 +68,6 @@ class AssetStatisticsViewModel(
 
 
     fun getAsset(username: String, token: String, currency: String) {
-        Log.d("Called get asset", "Get asset being called")
         viewModelScope.launch {
             try {
                 val response = assetRepository.getAsset(token, currency)
@@ -82,8 +79,6 @@ class AssetStatisticsViewModel(
                         pieChartData.value = getPieChartData(assetList)
                         val assetTotal = calculateAssetTotal(assetList)
                         if (assetTotalThisMonth.value.isNotNull()) {
-                            Log.d("Update executed", "update")
-                            Log.d("Original asset", assetTotalThisMonth.toString() )
                             assetTotalRepository.updateAssetTotalThisMonthAndYear(
                                 username = username ,
                                 year = currentDateTime.year,
@@ -91,7 +86,6 @@ class AssetStatisticsViewModel(
                                 value = assetTotal
                             )
                         } else {
-                            Log.d("Insert executed", "insert")
                             assetTotalRepository.insertAssetTotal(
                                 AssetTotal(
                                     id = 0,
@@ -102,14 +96,13 @@ class AssetStatisticsViewModel(
                                 )
                             )
                         }
-                        getAssetTotalByYear(username, currentDateTime.year )
+                        getAssetTotalByYear(username, currentDateTime.year)
                     }
                 } else {
                     assetStatisticState = AssetStatisticState.Error("Error in getting asset: ${response.message()}" )
                 }
             } catch (e: Exception) {
                 assetStatisticState = AssetStatisticState.Error("An error occurred: ${e.message}")
-                Log.e("Asset fetching error", e.message.toString())
             }
         }
     }
@@ -117,7 +110,6 @@ class AssetStatisticsViewModel(
     fun getAssetTotalByYear(username: String, year: Int) {
         viewModelScope.launch {
             assetTotalStatisticList.value = assetTotalRepository.getAllAssetTotalsForYear(username, year)
-            Log.d("Executed get asset by year", "executed")
         }
     }
 
@@ -201,7 +193,6 @@ class AssetViewModel(private val assetRepository: AssetRepository): ViewModel() 
                 }
             } catch (e: Exception) {
                 assetState = AssetState.Error("An error occurred: ${e.message}")
-                Log.e("Asset fetching error", e.message.toString())
             }
         }
     }
@@ -219,7 +210,6 @@ class AssetViewModel(private val assetRepository: AssetRepository): ViewModel() 
                 }
             } catch (e: Exception) {
                 assetState = AssetState.Error("An error occurred: ${e.message}")
-                Log.e("Login error", "" + e.message)
             }
         }
     }
@@ -237,7 +227,6 @@ class AssetViewModel(private val assetRepository: AssetRepository): ViewModel() 
                 }
             } catch (e: Exception) {
                 assetState = AssetState.Error("An error occurred: ${e.message}")
-                Log.e("Login error", "" + e.message)
             }
         }
     }
@@ -255,7 +244,6 @@ class AssetViewModel(private val assetRepository: AssetRepository): ViewModel() 
                 }
             } catch (e: Exception) {
                 assetState = AssetState.Error("An error occurred: ${e.message}")
-                Log.e("Login error", "" + e.message)
             }
         }
     }

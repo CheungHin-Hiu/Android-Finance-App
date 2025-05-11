@@ -41,7 +41,6 @@ class OverviewViewModel(private val transactionRepository: TransactionRepository
                 }
             }catch (e: Exception){
                 getTransactionState = GetTransactionState.Error("An error occurred: ${e.message}" )
-                Log.e("Transaction error", "" + e.message)
             }
         }
     }

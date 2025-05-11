@@ -3,8 +3,6 @@ package com.example.androidfinanceapp.data
 import com.example.androidfinanceapp.network.AuthApiService
 import com.example.androidfinanceapp.network.LoginRequest
 import com.example.androidfinanceapp.network.LoginResponse
-import com.example.androidfinanceapp.network.RefreshRequest
-import com.example.androidfinanceapp.network.RefreshResponse
 import com.example.androidfinanceapp.network.SignupRequest
 import com.example.androidfinanceapp.network.SignupResponse
 import retrofit2.Response
@@ -15,7 +13,6 @@ interface AuthRepository {
 
     suspend fun signup(username: String, password: String): Response<SignupResponse>
 
-    suspend fun refreshToken(refreshToken: String): Response<RefreshResponse>
 }
 
 // For DP injection
@@ -27,7 +24,4 @@ class NetworkAuthRepository(
 
     override suspend fun signup(username: String, password: String): Response<SignupResponse> =
         authApiService.signup(SignupRequest(username, password))
-
-    override suspend fun refreshToken(refreshToken: String): Response<RefreshResponse> =
-        authApiService.refreshToken(RefreshRequest(refreshToken))
 }

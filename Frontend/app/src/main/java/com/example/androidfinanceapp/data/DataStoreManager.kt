@@ -7,7 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-private val Context.dataStore by preferencesDataStore(name = "user_preferences")
+val Context.dataStore by preferencesDataStore(name = "user_preferences")
 
 // Datastore manager used to store and access user external id and JWT token received
 class DataStoreManager(private val context: Context) {
