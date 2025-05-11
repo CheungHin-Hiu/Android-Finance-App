@@ -48,7 +48,7 @@ class TargetController:
         targets = list(cursor)
 
         if not targets:
-            return {"status": 404, "message": "No targets found for the user"}
+            return {"status": 200, "targets": []}
 
         for target in targets:
             target["_id"] = str(target["_id"])  # Convert ObjectId to string

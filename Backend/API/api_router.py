@@ -114,7 +114,10 @@ class APIRouteDefintion:
         if (targets['status'] != 200):
             raise HTTPException(status_code=targets['status'], detail=targets['message'])
         
-        return await items_currency_conversion(targets['targets'], currency.upper())
+        converted_targets = await items_currency_conversion(targets['targets'], currency.upper())
+        return {
+            "targets": converted_targets
+        }
 
     # endpoint: _____/target, method: DELETE
     async def _delete_target_by_user(self, token: str):

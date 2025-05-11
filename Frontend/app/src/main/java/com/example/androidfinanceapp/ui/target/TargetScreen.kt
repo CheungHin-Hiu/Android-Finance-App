@@ -1,5 +1,6 @@
 package com.example.androidfinanceapp.ui.target
 
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -32,6 +33,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -49,6 +51,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,6 +63,7 @@ import com.example.androidfinanceapp.ui.common.AppNavigationDrawer
 import com.example.androidfinanceapp.ui.common.ScreenTopBar
 import com.example.androidfinanceapp.ui.theme.ErrorButton
 import kotlin.math.min
+import kotlin.math.round
 import kotlin.math.roundToInt
 
 sealed class TargetType(val name: String, val primary_color: Long, val secondary_color: Long) {
@@ -80,7 +84,7 @@ fun TargetScreen(
     // set idle
     targetViewModel.setGetIdle()
 
-    val token by dataStoreManager.tokenFlow.collectAsState(initial = null)
+    val token by dataStoreManager.tokenFlow.collectAsState(initial = "initial")
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val sheetState = rememberModalBottomSheetState()
@@ -88,12 +92,26 @@ fun TargetScreen(
 
     val scope = rememberCoroutineScope()
 
-    var savingAmount by remember { mutableFloatStateOf(0f) }
-    var savingTarget by remember { mutableFloatStateOf(0f) }
-    var budgetAmount by remember { mutableFloatStateOf(0f) }
-    var budgetTarget by remember { mutableFloatStateOf(0f) }
+    var savingAmount = 0f
+    var savingTarget = 0f
+    var budgetAmount = 0f
+    var budgetTarget = 0f
 
     // handle target state changes
+    LaunchedEffect(Unit) {
+        targetViewModel.getTarget(token, "USD")
+    }
+
+    targetViewModel.targets.forEach { target ->
+        if (target.type == "Budget") {
+            // to-do: create amount endpoint
+            budgetAmount = target.convertedAmount.toFloat()
+            budgetTarget = target.convertedAmount.toFloat()
+        } else {
+            savingAmount = target.convertedAmount.toFloat()
+            savingTarget = target.convertedAmount.toFloat()
+        }
+    }
 
     AppNavigationDrawer(
         navController = navController,
@@ -115,32 +133,55 @@ fun TargetScreen(
                     .padding(innerPadding),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Saving Target (to be replaced with db data)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(300.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    TargetProgressCircle(
-                        targetType = TargetType.Saving,
-                        currentAmount = 8000.toFloat(),
-                        target = 10000.toFloat()
-                    )
+                if (savingAmount > 0f) {
+                    // Saving Target (to be replaced with db data)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        TargetProgressCircle(
+                            targetType = TargetType.Saving,
+                            currentAmount = savingAmount,
+                            target = savingTarget
+                        )
+                    }
+                } else {
+                    // Saving Target (to be replaced with db data)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("No saving target found.")
+                    }
                 }
 
-                // Budget Target (to be replaced with db data)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(300.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    TargetProgressCircle(
-                        targetType = TargetType.Budget,
-                        currentAmount = 500.toFloat(),
-                        target = 10000.toFloat()
-                    )
+                if (budgetAmount > 0f) {
+                    // Budget Target (to be replaced with db data)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        TargetProgressCircle(
+                            targetType = TargetType.Budget,
+                            currentAmount = budgetAmount,
+                            target = budgetTarget
+                        )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("No budget target found.")
+                    }
                 }
 
                 // set target
@@ -153,7 +194,10 @@ fun TargetScreen(
 
                 // remove target
                 Button(
-                    onClick = { },
+                    onClick = {
+                        targetViewModel.deleteTarget(token)
+                        targetViewModel.getTarget(token, "USD")
+                    },
                     modifier = Modifier.width(200.dp)
                 ) {
                     Text("Remove Targets")
@@ -169,7 +213,15 @@ fun TargetScreen(
                     sheetState = sheetState
                 ) {
                     // Sheet content
-                    NewTargetForm(onDismiss = { showBottomSheet = false })
+                    NewTargetForm(
+                        onDismiss = { showBottomSheet = false },
+                        targetViewModel,
+                        onSave = {
+                            targetType, currency, newValue ->
+                            targetViewModel.addTarget(token, targetType, currency, newValue.toDouble())
+                            targetViewModel.getTarget(token, "USD")
+                        }
+                    )
                 }
             }
         }
@@ -235,7 +287,7 @@ fun TargetProgressCircle(targetType: TargetType, currentAmount: Float, target: F
                 textAlign = TextAlign.Center
             )
             Text(
-                text = "$${currentAmount.roundToInt()}/$${target.roundToInt()}", // Display percentage
+                text = "$${round(currentAmount*100)/100}/$${round(target*100)/100}", // Display percentage
                 color = Color.Black,
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center
@@ -246,8 +298,8 @@ fun TargetProgressCircle(targetType: TargetType, currentAmount: Float, target: F
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewTargetForm(onDismiss: () -> Unit) {
-    var selectedTargetType by remember { mutableStateOf<TargetType?>(null) }
+fun NewTargetForm(onDismiss: () -> Unit, targetViewModel: TargetViewModel, onSave: (TargetType, String, String) -> Unit) {
+    var selectedTargetType by remember { mutableStateOf<TargetType>(TargetType.Saving) }
     var newTargetValue by remember { mutableStateOf("") }
     var selectedCurrency by remember { mutableStateOf("HKD") }
     val currencies = listOf("HKD", "USD", "JPY", "CNY")
@@ -377,7 +429,10 @@ fun NewTargetForm(onDismiss: () -> Unit) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Button(
                 modifier = Modifier.width(100.dp),
-                onClick = { }
+                onClick = {
+                    onSave(selectedTargetType, selectedCurrency, newTargetValue)
+                    onDismiss()
+                }
             ) {
                 Text("Save")
             }
@@ -397,8 +452,8 @@ fun NewTargetForm(onDismiss: () -> Unit) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun TargetPreview() {
-    NewTargetForm({})
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun TargetPreview() {
+//    NewTargetForm({})
+//}
