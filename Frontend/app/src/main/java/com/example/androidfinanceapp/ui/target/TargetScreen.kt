@@ -1,6 +1,5 @@
 package com.example.androidfinanceapp.ui.target
 
-import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -36,7 +35,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,10 +49,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.toUpperCase
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.androidfinanceapp.data.DataStoreManager
@@ -62,9 +59,9 @@ import com.example.androidfinanceapp.ui.Screens
 import com.example.androidfinanceapp.ui.common.AppNavigationDrawer
 import com.example.androidfinanceapp.ui.common.ScreenTopBar
 import com.example.androidfinanceapp.ui.theme.ErrorButton
+import kotlinx.coroutines.launch
 import kotlin.math.min
 import kotlin.math.round
-import kotlin.math.roundToInt
 
 sealed class TargetType(val name: String, val primary_color: Long, val secondary_color: Long) {
     object Saving : TargetType("Saving", 0xFF5C0A0A, 0xFFFCCACA)
@@ -91,27 +88,25 @@ fun TargetScreen(
     var showBottomSheet by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
-
-    var savingAmount = 0f
     var savingTarget = 0f
-    var budgetAmount = 0f
     var budgetTarget = 0f
 
     // handle target state changes
     LaunchedEffect(Unit) {
         targetViewModel.getTarget(token, "USD")
+        targetViewModel.getAmount(token, "USD")
     }
 
     targetViewModel.targets.forEach { target ->
         if (target.type == "Budget") {
-            // to-do: create amount endpoint
-            budgetAmount = target.convertedAmount.toFloat()
             budgetTarget = target.convertedAmount.toFloat()
         } else {
-            savingAmount = target.convertedAmount.toFloat()
             savingTarget = target.convertedAmount.toFloat()
         }
     }
+
+    val savingAmount: Float = targetViewModel.amounts.saving.toFloat()
+    val budgetAmount: Float = targetViewModel.amounts.budget.toFloat()
 
     AppNavigationDrawer(
         navController = navController,
@@ -133,7 +128,7 @@ fun TargetScreen(
                     .padding(innerPadding),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (savingAmount > 0f) {
+                if (savingTarget > 0f) {
                     // Saving Target (to be replaced with db data)
                     Box(
                         modifier = Modifier
@@ -159,7 +154,7 @@ fun TargetScreen(
                     }
                 }
 
-                if (budgetAmount > 0f) {
+                if (budgetTarget > 0f) {
                     // Budget Target (to be replaced with db data)
                     Box(
                         modifier = Modifier
@@ -195,8 +190,10 @@ fun TargetScreen(
                 // remove target
                 Button(
                     onClick = {
-                        targetViewModel.deleteTarget(token)
-                        targetViewModel.getTarget(token, "USD")
+                        targetViewModel.viewModelScope.launch {
+                            targetViewModel.deleteTarget(token)
+                            targetViewModel.getTarget(token, "USD")
+                        }
                     },
                     modifier = Modifier.width(200.dp)
                 ) {
@@ -216,10 +213,16 @@ fun TargetScreen(
                     NewTargetForm(
                         onDismiss = { showBottomSheet = false },
                         targetViewModel,
-                        onSave = {
-                            targetType, currency, newValue ->
-                            targetViewModel.addTarget(token, targetType, currency, newValue.toDouble())
-                            targetViewModel.getTarget(token, "USD")
+                        onSave = { targetType, currency, newValue ->
+                            targetViewModel.viewModelScope.launch {
+                                targetViewModel.addTarget(
+                                    token,
+                                    targetType,
+                                    currency,
+                                    newValue.toDouble()
+                                )
+                                targetViewModel.getTarget(token, "USD")
+                            }
                         }
                     )
                 }
@@ -280,25 +283,58 @@ fun TargetProgressCircle(targetType: TargetType, currentAmount: Float, target: F
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "${targetType.name} Target", // Display percentage
-                color = Color.Black,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text = "$${round(currentAmount*100)/100}/$${round(target*100)/100}", // Display percentage
-                color = Color.Black,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center
-            )
+            if (currentAmount < target) {
+                Text(
+                    text = "${targetType.name} Target (USD)", // Display percentage
+                    color = Color.Black,
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "$${
+                        round(
+                            min(
+                                currentAmount,
+                                target
+                            ) * 100
+                        ) / 100
+                    }/$${round(target * 100) / 100}", // Display percentage
+                    color = Color.Black,
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center
+                )
+            } else {
+                // target reached
+                Text(
+                    text = "${targetType.name} Target Reached!",
+                    color = Color.Black,
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "Current ${targetType.name} (USD):",
+                    color = Color.Black,
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = " $${round(currentAmount * 100) / 100}",
+                    color = Color.Black,
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewTargetForm(onDismiss: () -> Unit, targetViewModel: TargetViewModel, onSave: (TargetType, String, String) -> Unit) {
+fun NewTargetForm(
+    onDismiss: () -> Unit,
+    targetViewModel: TargetViewModel,
+    onSave: (TargetType, String, String) -> Unit
+) {
     var selectedTargetType by remember { mutableStateOf<TargetType>(TargetType.Saving) }
     var newTargetValue by remember { mutableStateOf("") }
     var selectedCurrency by remember { mutableStateOf("HKD") }
@@ -428,18 +464,6 @@ fun NewTargetForm(onDismiss: () -> Unit, targetViewModel: TargetViewModel, onSav
         // save & discard button
         Row(verticalAlignment = Alignment.CenterVertically) {
             Button(
-                modifier = Modifier.width(100.dp),
-                onClick = {
-                    onSave(selectedTargetType, selectedCurrency, newTargetValue)
-                    onDismiss()
-                }
-            ) {
-                Text("Save")
-            }
-
-            Spacer(modifier = Modifier.width(5.dp))
-
-            Button(
                 colors = ButtonDefaults.buttonColors(containerColor = ErrorButton),
                 modifier = Modifier.width(100.dp),
                 onClick = {
@@ -447,6 +471,18 @@ fun NewTargetForm(onDismiss: () -> Unit, targetViewModel: TargetViewModel, onSav
                 }
             ) {
                 Text("Discard")
+            }
+
+            Spacer(modifier = Modifier.width(5.dp))
+
+            Button(
+                modifier = Modifier.width(100.dp),
+                onClick = {
+                    onSave(selectedTargetType, selectedCurrency, newTargetValue)
+                    onDismiss()
+                }
+            ) {
+                Text("Save")
             }
         }
     }

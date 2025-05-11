@@ -25,6 +25,13 @@ interface TargetApiService {
     suspend fun deleteTarget(
         @Path("token", encoded = true) token: String,
     ): Response<Unit>
+
+    // for saving and budget amount
+    @GET("/transaction/{token}/{currency}")
+    suspend fun getAmount(
+        @Path("token", encoded = true) token: String,
+        @Path("currency",encoded = true) currency: String = "HKD"
+    ): Response<List<Transaction>>
 }
 
 @Serializable

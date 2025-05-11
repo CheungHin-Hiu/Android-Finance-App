@@ -1,8 +1,9 @@
 package com.example.androidfinanceapp.data
 
+import com.example.androidfinanceapp.network.GetTargetResponse
 import com.example.androidfinanceapp.network.NewTarget
 import com.example.androidfinanceapp.network.TargetApiService
-import com.example.androidfinanceapp.network.GetTargetResponse
+import com.example.androidfinanceapp.network.Transaction
 import retrofit2.Response
 
 interface TargetRepository {
@@ -21,6 +22,11 @@ interface TargetRepository {
     suspend fun deleteTarget(
         token: String
     ): Response<Unit>
+
+    suspend fun getAmount(
+        token: String,
+        currency: String
+    ): Response<List<Transaction>>
 }
 
 class NetworkTargetRepository(
@@ -53,4 +59,11 @@ class NetworkTargetRepository(
 
     override suspend fun deleteTarget(token: String): Response<Unit> =
         targetApiService.deleteTarget(token = token)
+
+    override suspend fun getAmount(token: String, currency: String): Response<List<Transaction>> =
+        targetApiService.getAmount(
+            token = token,
+            currency = currency
+        )
+
 }
