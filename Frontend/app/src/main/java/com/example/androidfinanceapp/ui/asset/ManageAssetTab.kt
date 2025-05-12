@@ -195,7 +195,7 @@ fun ManageAssetTab(
     }
 }
 
-private fun getAmountSuffix(categoryString: String): String {
+fun getAmountSuffix(categoryString: String): String {
     val suffix = when(categoryString) {
         "Coin" -> " Coin"
         "Stock" -> " Share"
@@ -204,7 +204,7 @@ private fun getAmountSuffix(categoryString: String): String {
     return suffix
 }
 
-private fun transformDate(inputDate: String): String {
+fun transformDate(inputDate: String): String {
     // Define the input and output date formats
     val inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
     val outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd:HH:mm")
@@ -214,7 +214,7 @@ private fun transformDate(inputDate: String): String {
     return dateTime.format(outputFormatter)
 }
 
-private fun filterAssetList(
+fun filterAssetList(
     assetList: MutableList<Asset>,
     assetType: String,
     dateRange: String,

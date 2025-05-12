@@ -470,7 +470,7 @@ fun AssetLineChart(
 
 }
 
-private fun standardizeNumber(values: List<Float>): MutableList<Float> {
+fun standardizeNumber(values: List<Float>): MutableList<Float> {
     if (values.isEmpty()) return mutableListOf()
 
     val min = values.minOrNull() ?: return mutableListOf()
