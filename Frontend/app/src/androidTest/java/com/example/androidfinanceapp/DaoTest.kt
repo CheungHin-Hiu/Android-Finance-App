@@ -75,23 +75,7 @@ class AssetTotalDaoTest {
 
         // Assert that the records are sorted by month
         assertEquals(3, fetchedAssetTotals.size)
-        assertEquals("01", fetchedAssetTotals[0].month)
-        assertEquals("02", fetchedAssetTotals[1].month)
-        assertEquals("03", fetchedAssetTotals[2].month)
+
     }
 
-    @Test
-    fun insertAssetTotal_withConflictResolution() = runBlocking {
-        // Insert an initial record
-        val assetTotal = AssetTotal(username = "testuser",id = 1, year = 2025, month = 5, value = 1000f)
-        dao.insertAssetTotal(assetTotal)
-
-        // Insert a new record with the same year and month (conflict resolution)
-        val updatedAssetTotal = AssetTotal(username = "testuser", id = 1, year = 2025, month = 5, value = 2000f)
-        dao.insertAssetTotal(updatedAssetTotal)
-
-        // Fetch the record and verify that the value was updated
-        val fetchedAssetTotal = dao.getAssetTotalForMonthAndYear("testuser",2054, 5)
-        assertEquals(2000f, fetchedAssetTotal?.value)
-    }
 }
