@@ -1,10 +1,10 @@
 # Android-Finance-App Backend
 
-## Project Overview
+## Backend Overview
 
-This is the backend server for the Android-Finance-App, built with FastAPI. It provides API endpoints for financial data processing, user authentication, and integration with external services like Yahoo Finance.
+This is the readme for the Android-Finance-App backend servcer, built with FastAPI. It provides API endpoints for financial data processing, user authentication, and integration with external services like Yahoo Finance.
 
-The backend runs on Uvicorn, an ASGI server, and connects to a MongoDB database for data persistence.
+The backend runs on Uvicorn, an ASGI server, and connects to a MongoDB cloud database for data persistence.
 
 ---
 
