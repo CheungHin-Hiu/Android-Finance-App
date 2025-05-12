@@ -1,5 +1,9 @@
 # Android-Finance-App Backend
 
+##
+The backend server is currently hosted on Google Cloud, available for public use till 2025/6/1. Any application run before this date is not required to set up the backend server
+---
+
 ## Backend Overview
 
 This is the readme for the Android-Finance-App backend servcer, built with FastAPI. It provides API endpoints for financial data processing, user authentication, and integration with external services like Yahoo Finance.
