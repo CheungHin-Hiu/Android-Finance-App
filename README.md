@@ -1,8 +1,9 @@
 # Android-Finance-App Backend
 
-##
+## Important!
+
 The backend server is currently hosted on Google Cloud, available for public use till 2025/6/1. Any application run before this date is not required to set up the backend server
----
+
 
 ## Backend Overview
 
